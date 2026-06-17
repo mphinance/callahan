@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Operation Callahan — Trip HQ</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  :root{
+    --bg:#0b0418; --bg2:#150a2e; --ink:#f3e9ff; --muted:#9a86c4;
+    --pink:#ff2e88; --cyan:#16e0ff; --purple:#a855f7; --yellow:#ffd23f;
+    --green:#39ff8b; --orange:#ff7b39; --card:#1a0f33; --line:#3a2563;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(168,85,247,.25), transparent 60%),
+      radial-gradient(900px 500px at 0% 10%, rgba(22,224,255,.15), transparent 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2)) fixed;
+    color:var(--ink); line-height:1.5; min-height:100%;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:18px 14px 96px}
+  header.mast{text-align:center; padding:18px 10px 10px}
+  .kicker{letter-spacing:.4em; font-size:11px; color:var(--cyan); text-transform:uppercase}
+  h1{margin:6px 0 2px; font-size:clamp(28px,7vw,52px); font-weight:900; letter-spacing:-1px;
+     background:linear-gradient(90deg,var(--pink),var(--yellow),var(--cyan));
+     -webkit-background-clip:text; background-clip:text; color:transparent}
+  .sub{color:var(--muted); font-size:14px}
+  /* countdown */
+  .count{display:flex; gap:10px; justify-content:center; margin:14px 0 6px; flex-wrap:wrap}
+  .count .box{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 14px; min-width:66px}
+  .count .n{font-size:26px; font-weight:900; color:var(--cyan); font-variant-numeric:tabular-nums; line-height:1}
+  .count .l{font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted)}
+  .clocks{font-size:12px; color:var(--muted); margin-top:4px}
+  .clocks b{color:var(--ink)}
+  /* tabs */
+  nav.tabs{position:sticky; top:0; z-index:500; display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+    padding:10px 6px; margin:10px 0 16px; backdrop-filter:blur(8px);
+    background:linear-gradient(180deg, rgba(11,4,24,.92), rgba(11,4,24,.6))}
+  nav.tabs button{
+    background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--muted);
+    padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600; cursor:pointer; transition:.15s}
+  nav.tabs button:hover{color:var(--ink)}
+  nav.tabs button.on{color:#0b0418; background:linear-gradient(90deg,var(--cyan),var(--green)); border-color:transparent}
+  section.tab{display:none; animation:fade .25s}
+  section.tab.on{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)}to{opacity:1}}
+  h2{font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--purple); margin:26px 0 12px; display:flex; align-items:center; gap:10px}
+  h2::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--line),transparent)}
+  .grid{display:grid; gap:14px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:780px){.g3,.g4{grid-template-columns:1fr 1fr}} @media(max-width:520px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px; box-shadow:0 8px 30px rgba(0,0,0,.3)}
+  .card h3{margin:0 0 8px; font-size:16px}
+  .big{font-size:30px; font-weight:900}
+  .cyan{color:var(--cyan)} .pink{color:var(--pink)} .yellow{color:var(--yellow)} .green{color:var(--green)} .mut{color:var(--muted)}
+  /* map */
+  #map{height:62vh; min-height:380px; width:100%; border-radius:14px; border:1px solid var(--line); z-index:1}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#1a0f33; color:#f3e9ff; border:1px solid #3a2563}
+  .leaflet-popup-content{margin:10px 12px; font-size:13px}
+  .mapbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:0 0 12px}
+  .btn{background:linear-gradient(90deg,var(--pink),var(--purple)); color:#fff; border:none; padding:10px 16px;
+    border-radius:10px; font-weight:700; cursor:pointer; font-size:14px}
+  .btn.alt{background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--ink)}
+  .btn:disabled{opacity:.5; cursor:default}
+  .stat{display:flex; gap:14px; flex-wrap:wrap; margin:12px 0}
+  .stat .s{flex:1; min-width:120px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; text-align:center}
+  .stat .s .v{font-size:22px; font-weight:900; color:var(--cyan); font-variant-numeric:tabular-nums}
+  .stat .s .k{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+  .prog{height:10px; background:rgba(255,255,255,.07); border-radius:99px; overflow:hidden; margin:8px 0 4px}
+  .prog>i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--cyan),var(--green),var(--yellow)); transition:width .4s}
+  /* lists */
+  .row{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px}
+  .row:last-child{border:0}
+  .row .h{color:var(--cyan); font-variant-numeric:tabular-nums; white-space:nowrap; font-size:13px}
+  .callout{border-left:3px solid var(--cyan); padding:11px 13px; background:rgba(22,224,255,.06); border-radius:0 10px 10px 0; margin:10px 0; font-size:14px}
+  .callout.pink{border-color:var(--pink); background:rgba(255,46,136,.07)}
+  .callout.yellow{border-color:var(--yellow); background:rgba(255,210,63,.07)}
+  ul.tight{margin:6px 0 0; padding-left:20px; font-size:14px} ul.tight li{margin:5px 0}
+  .eat{display:flex; gap:12px; align-items:flex-start}
+  .eat .pin{font-size:22px} .eat .body{flex:1}
+  .eat .name{font-weight:700} .eat .meta{color:var(--muted); font-size:12px}
+  .tag{display:inline-block; font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:2px 7px; border-radius:6px}
+  .tag.kid{background:rgba(57,255,139,.16); color:var(--green)} .tag.fun{background:rgba(255,210,63,.16); color:var(--yellow)}
+  .tag.quick{background:rgba(22,224,255,.16); color:var(--cyan)}
+  /* checklist */
+  label.item{display:flex; gap:10px; align-items:flex-start; padding:6px 4px; border-radius:8px; cursor:pointer; font-size:14px}
+  label.item:hover{background:rgba(255,255,255,.04)}
+  label.item input{appearance:none; width:18px; height:18px; border:2px solid var(--purple); border-radius:5px; margin-top:2px; flex:none; position:relative; cursor:pointer}
+  label.item input:checked{background:var(--green); border-color:var(--green)}
+  label.item input:checked::after{content:"\2713"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#062; font-weight:900; font-size:13px}
+  label.item input:checked + span{opacity:.45; text-decoration:line-through}
+  .hint{color:var(--muted); font-size:12px; display:block}
+  .conv{font-size:13px; color:var(--muted)}
+  .conv code{background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; color:var(--cyan)}
+  .dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px}
+  a{color:var(--cyan)}
+  .foot{text-align:center; color:var(--muted); font-size:12px; margin-top:36px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div class="kicker">Trip HQ &middot; Tommy Boy was right, it's in Sandusky</div>
+    <h1>OPERATION CALLAHAN</h1>
+    <div class="sub">Colgate, WI &rarr; Cedar Point &middot; Kilian turns 8</div>
+    <div class="count" id="count"></div>
+    <div class="clocks" id="clocks"></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-t="now" class="on">Now</button>
+    <button data-t="map">Live Map</button>
+    <button data-t="park">Park Map</button>
+    <button data-t="route">Route &amp; Tolls</button>
+    <button data-t="eats">Eats</button>
+    <button data-t="plan">Park Plan</button>
+    <button data-t="pack">Pack</button>
+  </nav>
+
+  <!-- ===================== NOW ===================== -->
+  <section class="tab on" id="now">
+    <div class="grid g3">
+      <div class="card"><h3 class="cyan">Thursday 6/18</h3><div class="mut">Travel + cabin check-in</div>
+        <p>Out around 1pm Central. ~6 hrs driving plus the hour lost to Eastern time puts you at the KOA near 8pm ET. Deluxe cabin means no setup in the dark, just unload and breathe. Heads up, it's a windy day (gusts to 37), so expect crosswinds on I-90 by the lake.</p>
+        <div class="tag fun">~8pm ET arrival</div></div>
+      <div class="card" style="border-color:var(--yellow)"><h3 class="yellow">Friday 6/19</h3><div class="mut">BIRTHDAY + Cedar Point</div>
+        <p>Sunny, 77, light wind. The perfect park day. Rope-drop the coasters, free birthday button at Guest Services, Giant Wheel at dusk, cake at the campsite.</p>
+        <div class="tag kid">Go big</div></div>
+      <div class="card"><h3 class="pink">Saturday 6/20</h3><div class="mut">Drive home</div>
+        <p>Sunny 78, slight 2pm storm chance. Pack up and get on the road in the morning to beat it. Home by evening Central.</p>
+        <div class="tag quick">Head out AM</div></div>
+    </div>
+
+    <h2>The Numbers</h2>
+    <div class="grid g4">
+      <div class="card" style="text-align:center"><div class="big cyan">~420</div><div class="mut">miles each way</div></div>
+      <div class="card" style="text-align:center"><div class="big cyan">~6 hr</div><div class="mut">driving (no stops)</div></div>
+      <div class="card" style="text-align:center"><div class="big yellow">+1 hr</div><div class="mut">Eastern time there</div></div>
+      <div class="card" style="text-align:center"><div class="big pink">$25-35</div><div class="mut">tolls each way</div></div>
+    </div>
+
+    <h2>Don't Forget (the sneaky stuff)</h2>
+    <div class="grid g2">
+      <div class="card"><ul class="tight">
+        <li><b>Lost-kid plan:</b> photo of Kilian each morning in that day's clothes, your number on a card in his pocket, a meetup landmark.</li>
+        <li><b>Ride lockers are credit-card only.</b> No coins, no debit. Keep a card on the lead adult.</li>
+        <li><b>Buy tickets / Fast Lane Thursday night</b> on campsite wifi, not in a dead-zone line at the gate.</li>
+      </ul></div>
+      <div class="card"><ul class="tight">
+        <li><b>Bottled water for the KOA</b> tap, reviewers ding the water quality.</li>
+        <li><b>Ziploc the phones</b> before Snake River Falls and Thunder Canyon. You will get soaked.</li>
+        <li><b>Birthday button photo</b> at the front sign first thing, before everyone melts.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- ===================== MAP ===================== -->
+  <section class="tab" id="map-tab">
+    <div class="mapbar">
+      <button class="btn" id="trackBtn">Start tracking my location</button>
+      <button class="btn alt" id="fitBtn">Show whole route</button>
+      <span id="trackState" class="mut">Tracking off</span>
+    </div>
+    <div id="map"></div>
+    <div class="stat">
+      <div class="s"><div class="v" id="stRemain">—</div><div class="k">miles to KOA</div></div>
+      <div class="s"><div class="v" id="stEta">—</div><div class="k">est. arrival</div></div>
+      <div class="s"><div class="v" id="stPct">0%</div><div class="k">of the way</div></div>
+      <div class="s"><div class="v" id="stSpeed">—</div><div class="k">current mph</div></div>
+    </div>
+    <div class="prog"><i id="progBar"></i></div>
+
+    <h2>Convoy Mode (optional, share between cars)</h2>
+    <div class="card conv">
+      <p>Right now this tracks <b>your</b> phone, no setup, works the second you tap Start. To see <b>both vehicles</b> on the same map live, flip on convoy mode:</p>
+      <ol>
+        <li>Make a free Firebase project, add a Realtime Database, copy the web config.</li>
+        <li>Paste it into the <code>FIREBASE_CONFIG</code> block near the bottom of <code>index.html</code>.</li>
+        <li>Everyone opens the page with the same trip code in the URL, e.g. <code>?crew=callahan</code>, and pins appear for each car.</li>
+      </ol>
+      <p class="mut">No config pasted = solo mode, which is exactly what you have now. I left the wiring in so it's a 2-minute switch if you want it.</p>
+      <div id="convoyState"></div>
+    </div>
+    <p class="mut" style="font-size:12px">Location needs HTTPS. Works on Netlify / GitHub Pages / Railway (all HTTPS) or <code>localhost</code>. Map tiles &copy; OpenStreetMap.</p>
+  </section>
+
+  <!-- ===================== PARK MAP (owned by assets/park.js) ===================== -->
+  <section class="tab" id="park">
+    <!-- assets/park.js renders into this section. It defines window.onParkTabShown()
+         which index.html calls when this tab opens, and reuses the .btn/.stat/.card styles. -->
+  </section>
+
+  <!-- ===================== ROUTE ===================== -->
+  <section class="tab" id="route">
+    <div class="grid g2">
+      <div class="card" style="border-color:var(--green)">
+        <h3 class="green">Take this one (faster, tolled)</h3>
+        <div class="mut">The route your mom meant</div>
+        <ul class="tight">
+          <li>I-94 SE through Milwaukee toward Chicago</li>
+          <li><b>Chicago Skyway</b> (~$8 car)</li>
+          <li><b>Indiana Toll Road</b> full length, ~157 mi (~$13-14 cash / ~$11 E-ZPass)</li>
+          <li><b>Ohio Turnpike</b> west gate to the Sandusky exit (~$3-4)</li>
+          <li>US-250 / US-6 to the KOA on Cleveland Rd</li>
+        </ul>
+        <div class="callout green" style="margin-top:10px"><b>~420 mi, ~6 hrs</b> non-stop, plus the 1-hour time-zone jump. Tolls roughly <b>$25-35</b> cash each way.</div>
+      </div>
+      <div class="card">
+        <h3>The free alternative</h3>
+        <div class="mut">Skip if you're chasing the shorter clock</div>
+        <ul class="tight">
+          <li>Loops up and around through Michigan to dodge the Chicago tolls</li>
+          <li>Longer in both miles and time, and you still hit Chicago traffic gravity</li>
+          <li>Only worth it if a toll-free transponder situation makes it a wash</li>
+        </ul>
+        <div class="callout">You already said you're taking the toll route, so this is just here for the record.</div>
+      </div>
+    </div>
+    <h2>Smart Money + Timing</h2>
+    <div class="card"><ul class="tight">
+      <li><b>Get an E-ZPass / I-PASS transponder</b> if either car has one, it's cheaper than cash on the Indiana Toll Road and saves the booth stop.</li>
+      <li><b>Gas up before the Skyway,</b> Illinois/Indiana toll-corridor prices run high.</li>
+      <li><b>Eastern time:</b> leaving ~1pm Central puts you near Sandusky around 8pm Eastern with one good meal stop. Deluxe cabin check-in, so no tent setup in the dark.</li>
+      <li><b>Saturday home:</b> leave the KOA in the morning to beat the 2pm storm chance and you're back in Colgate for a normal evening.</li>
+    </ul></div>
+  </section>
+
+  <!-- ===================== EATS ===================== -->
+  <section class="tab" id="eats">
+    <h2>On the Road (toll corridor)</h2>
+    <div class="grid g2">
+      <div class="card"><div class="eat"><div class="pin">&#127789;</div><div class="body">
+        <div class="name">Indiana Toll Road travel oasis</div>
+        <div class="meta">Right over the highway, no exit detour. Bathrooms, fuel, fast food.</div>
+        <span class="tag quick">Zero detour</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#129366;</div><div class="body">
+        <div class="name">Das Dutchman Essenhaus &middot; Middlebury, IN</div>
+        <div class="meta">Amish family-style, legendary pies. Small detour off the Toll Road.</div>
+        <span class="tag fun">Worth a detour</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#127828;</div><div class="body">
+        <div class="name">Tony Packo's &middot; Toledo, OH</div>
+        <div class="meta">Famous Hungarian hot dogs, the M*A*S*H spot. Fun, fast, kid-friendly, right on the way.</div>
+        <span class="tag kid">Kid win</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#9992;&#65039;</div><div class="body">
+        <div class="name">Tin Goose Diner &middot; Port Clinton, OH</div>
+        <div class="meta">1950s aluminum diner inside an aviation museum near Cedar Point. Burgers + vintage planes.</div>
+        <span class="tag fun">8-yr-old catnip</span></div></div></div>
+    </div>
+    <h2>In Sandusky</h2>
+    <div class="grid g2">
+      <div class="card"><div class="eat"><div class="pin">&#127846;</div><div class="body">
+        <div class="name">Toft's Ice Cream Parlor</div>
+        <div class="meta">50+ flavors, sundaes, banana splits. The birthday-dessert move.</div>
+        <span class="tag kid">Birthday cone</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#129374;</div><div class="body">
+        <div class="name">Sandusky Bay Pancake House</div>
+        <div class="meta">Big breakfast before the park. Pancakes, crepes, vegan + GF options.</div>
+        <span class="tag quick">Pre-park fuel</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#127844;</div><div class="body">
+        <div class="name">New Sandusky Fish Company</div>
+        <div class="meta">Lake Erie perch sandwiches done right. Local classic.</div>
+        <span class="tag fun">Local pick</span></div></div></div>
+      <div class="card"><div class="eat"><div class="pin">&#127828;</div><div class="body">
+        <div class="name">Inside the park</div>
+        <div class="meta">Melt sandwiches, Chickie's &amp; Pete's, Panda Express. A dining plan can pay off for a full day.</div>
+        <span class="tag quick">Friday lunch</span></div></div></div>
+    </div>
+    <p class="mut" style="font-size:12px">All of these drop as pins on the Live Map tab too.</p>
+  </section>
+
+  <!-- ===================== PLAN ===================== -->
+  <section class="tab" id="plan">
+    <div class="callout yellow"><b>Kilian's 51 inches, which is the good news.</b> He clears the entire 48-inch coaster tier, including the big famous ones. He's just one inch under the 52-inch club. Hype what he CAN ride and he'll have the day of his life.</div>
+    <div class="grid g2">
+      <div class="card"><h3 class="green" style="margin-top:0">He CAN ride these (48")</h3>
+        <div class="row"><span>Magnum XL-200 (legendary hyper coaster)</span><span class="h">48"</span></div>
+        <div class="row"><span>Valravn (B&amp;M dive coaster)</span><span class="h">48"</span></div>
+        <div class="row"><span>Siren's Curse (new tilt coaster)</span><span class="h">48"</span></div>
+        <div class="row"><span>Gemini (racing coaster, great first big one)</span><span class="h">48"</span></div>
+        <div class="row"><span>Blue Streak &middot; Iron Dragon &middot; Corkscrew</span><span class="h">48"</span></div>
+        <div class="row"><span>Cedar Creek Mine Ride &middot; Woodstock Express</span><span class="h">48"</span></div>
+      </div>
+      <div class="card"><h3 class="pink" style="margin-top:0">One inch short (52")</h3>
+        <div class="row"><span>Top Thrill 2 (420 ft, 120 mph)</span><span class="h">52"</span></div>
+        <div class="row"><span>GateKeeper (wing coaster over the gate)</span><span class="h">52"</span></div>
+        <div class="row"><span>MaXair (giant swing)</span><span class="h">52"</span></div>
+        <div class="callout pink" style="margin-top:12px">So close. Don't make a thing of it. "Next year you're tall enough for the 120-mph one" is a pretty great thing to tell a kid.</div>
+      </div>
+    </div>
+    <h2>The Friday Battle Plan</h2>
+    <div class="card"><ul class="tight">
+      <li><b>Rope drop</b> the biggest coasters first (Magnum, Valravn, Siren's Curse) while lines are short and it's cool.</li>
+      <li><b>Free birthday button</b> at Guest Services near the front gate, plus a sign photo before anyone's sweaty.</li>
+      <li><b>Hot midday:</b> water rides (Snake River Falls, Thunder Canyon) and Camp Snoopy shade. Ziploc the phones.</li>
+      <li><b>Birthday dinner</b> in-park or back at Toft's for a cone.</li>
+      <li><b>Giant Wheel at dusk</b> over Lake Erie to close out being 8 years old. That's the photo.</li>
+    </ul></div>
+  </section>
+
+  <!-- ===================== PACK ===================== -->
+  <section class="tab" id="pack">
+    <p class="mut">Quick version below. The full printable checklist with progress bars lives in
+      <a href="operation-callahan.html">operation-callahan.html</a>. Checks here save on this device.</p>
+    <div class="grid g2" id="packGrid">
+      <div class="card"><h3 class="yellow">Birthday</h3>
+        <label class="item"><input type="checkbox"><span>Wrapped gifts hidden where he won't dig</span></label>
+        <label class="item"><input type="checkbox"><span>Cake/cupcakes + candles + lighter</span></label>
+        <label class="item"><input type="checkbox"><span>Birthday outfit for Friday</span></label>
+        <label class="item"><input type="checkbox"><span>Cash for a park souvenir</span></label>
+      </div>
+      <div class="card"><h3 class="cyan">Park day bag</h3>
+        <label class="item"><input type="checkbox"><span>Small bag (8x12x4 in max)</span></label>
+        <label class="item"><input type="checkbox"><span>SPF 50 + reapply stick</span></label>
+        <label class="item"><input type="checkbox"><span>Refillable water bottles</span></label>
+        <label class="item"><input type="checkbox"><span>Credit card (lockers are card-only)</span></label>
+        <label class="item"><input type="checkbox"><span>Ziploc for phones on water rides</span></label>
+        <label class="item"><input type="checkbox"><span>Packable poncho + battery pack</span></label>
+      </div>
+      <div class="card"><h3 class="green">Deluxe Cabin</h3>
+        <div class="hint" style="margin:-4px 0 8px">Provided: full kitchen + dishes, bathroom, linens &amp; towels for 6, futon, cable, fire pit, propane grill. So skip tent, bedding, and bath towels.</div>
+        <label class="item"><input type="checkbox"><span>Groceries + coffee + food to grill</span></label>
+        <label class="item"><input type="checkbox"><span>Bottled water (KOA tap is iffy)</span></label>
+        <label class="item"><input type="checkbox"><span>Dish soap + sponge + a couple trash bags</span></label>
+        <label class="item"><input type="checkbox"><span>Firewood (buy on site) + lighter + s'mores</span></label>
+        <label class="item"><input type="checkbox"><span>Bug spray + beach towels + camp chairs</span></label>
+        <label class="item"><input type="checkbox"><span>Cooler for the drive + Thursday-night dinner</span></label>
+      </div>
+      <div class="card"><h3 class="pink">Clothes + car</h3>
+        <label class="item"><input type="checkbox"><span>Hoodie/fleece per person</span></label>
+        <label class="item"><input type="checkbox"><span>Swimsuits + spare shoes</span></label>
+        <label class="item"><input type="checkbox"><span>Road snacks + tablet + headphones</span></label>
+        <label class="item"><input type="checkbox"><span>Cash for tolls + phone car mount</span></label>
+        <label class="item"><input type="checkbox"><span>Meds + first-aid + after-sun</span></label>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    Built for Operation Callahan &middot; weather via NWS Sandusky &middot; tolls/rides verified 6/17/26.<br>
+    Re-check weather Thursday AM. Have the best one, and tell Kilian happy birthday.
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* ---------- OPTIONAL convoy mode: paste your Firebase web config here ---------- */
+var FIREBASE_CONFIG = null; // e.g. {apiKey:"...", databaseURL:"https://xxx.firebaseio.com", projectId:"..."}
+/* ------------------------------------------------------------------------------ */
+
+// Key coordinates (approximate)
+var ORIGIN = {lat:43.215, lng:-88.246, name:"Home base, Colgate WI 53033"};
+var KOA    = {lat:41.466, lng:-82.656, name:"Sandusky / Bayshore KOA"};
+var CP     = {lat:41.478, lng:-82.683, name:"Cedar Point"};
+
+// Route waypoints (toll route, approximate for the line + progress math)
+var ROUTE = [
+  [43.215,-88.246],[43.03,-87.96],[42.30,-87.83],[41.715,-87.55],
+  [41.59,-87.20],[41.68,-86.25],[41.70,-85.97],[41.65,-84.10],
+  [41.66,-83.55],[41.51,-82.94],[41.466,-82.656]
+];
+
+// Food / fun pins
+var STOPS = [
+  {ll:[41.66,-86.40], n:"Indiana Toll Road oasis", d:"Over-highway plaza, zero detour", e:"⛽"},
+  {ll:[41.6745,-85.6905], n:"Das Dutchman Essenhaus", d:"Amish family-style + pie (Middlebury IN)", e:"🥧"},
+  {ll:[41.6620,-83.5110], n:"Tony Packo's", d:"Famous Hungarian dogs, Toledo OH", e:"🌭"},
+  {ll:[41.5120,-82.9410], n:"Tin Goose Diner", d:"50s diner in an aviation museum, Port Clinton", e:"✈️"},
+  {ll:[41.4470,-82.7080], n:"Toft's Ice Cream", d:"Birthday cone HQ, Sandusky", e:"🍦"}
+];
+
+// ----- Map -----
+var map, meMarker, accCircle, progLine, watchId=null, mapReady=false, peers={}, db=null, crew=null;
+function initMap(){
+  if(mapReady) return;
+  map = L.map('map',{zoomControl:true}).setView([42.1,-85.3], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19, attribution:'&copy; OpenStreetMap'}).addTo(map);
+  L.polyline(ROUTE,{color:'#16e0ff',weight:4,opacity:.7,dashArray:'2,8'}).addTo(map);
+  markerDot(ORIGIN.lat,ORIGIN.lng,'#a855f7').addTo(map).bindPopup("<b>Start</b><br>"+ORIGIN.name);
+  markerDot(KOA.lat,KOA.lng,'#39ff8b').addTo(map).bindPopup("<b>KOA</b><br>"+KOA.name);
+  markerDot(CP.lat,CP.lng,'#ffd23f').addTo(map).bindPopup("<b>Cedar Point</b>");
+  STOPS.forEach(function(s){
+    markerDot(s.ll[0],s.ll[1],'#ff7b39').addTo(map).bindPopup("<b>"+s.e+" "+s.n+"</b><br>"+s.d);
+  });
+  fitRoute();
+  mapReady=true;
+}
+function markerDot(lat,lng,color){
+  return L.circleMarker([lat,lng],{radius:8,color:'#0b0418',weight:2,fillColor:color,fillOpacity:1});
+}
+function fitRoute(){ if(map) map.fitBounds(L.latLngBounds(ROUTE).pad(0.15)); }
+
+// ----- Geometry -----
+function haversine(a,b,c,d){ // miles
+  var R=3958.8, t=Math.PI/180;
+  var dLat=(c-a)*t, dLng=(d-b)*t;
+  var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*t)*Math.cos(c*t)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function routeTotal(){ var s=0; for(var i=1;i<ROUTE.length;i++) s+=haversine(ROUTE[i-1][0],ROUTE[i-1][1],ROUTE[i][0],ROUTE[i][1]); return s; }
+var TOTAL = routeTotal();
+// distance still to go = straight-line to KOA (good enough for a progress feel)
+function update(lat,lng,speedMps){
+  var remain = haversine(lat,lng,KOA.lat,KOA.lng);
+  var done = Math.max(0, TOTAL - remain);
+  var pct = Math.min(100, Math.max(0, 100*done/TOTAL));
+  document.getElementById('stRemain').textContent = remain.toFixed(0);
+  document.getElementById('stPct').textContent = pct.toFixed(0)+'%';
+  document.getElementById('progBar').style.width = pct+'%';
+  var mph = (speedMps!=null && speedMps>=0) ? speedMps*2.23694 : null;
+  document.getElementById('stSpeed').textContent = mph!=null ? mph.toFixed(0) : '—';
+  // ETA: use live speed if moving, else assume 62 mph
+  var v = (mph && mph>15) ? mph : 62;
+  var hrs = remain / v;
+  var eta = new Date(Date.now() + hrs*3600*1000);
+  // show in Eastern (destination) time
+  document.getElementById('stEta').textContent = eta.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})+' ET';
+}
+function placeMe(lat,lng,acc){
+  if(!meMarker){
+    meMarker = L.circleMarker([lat,lng],{radius:9,color:'#fff',weight:2,fillColor:'#ff2e88',fillOpacity:1}).addTo(map).bindPopup("You");
+    accCircle = L.circle([lat,lng],{radius:acc||50,color:'#ff2e88',weight:1,fillOpacity:.08}).addTo(map);
+  } else { meMarker.setLatLng([lat,lng]); accCircle.setLatLng([lat,lng]).setRadius(acc||50); }
+}
+
+// ----- Tracking -----
+document.getElementById('trackBtn').addEventListener('click', function(){
+  initMap();
+  if(watchId!=null){ navigator.geolocation.clearWatch(watchId); watchId=null; this.textContent='Start tracking my location'; setState('Tracking off'); return; }
+  if(!navigator.geolocation){ setState('Geolocation not supported on this device'); return; }
+  setState('Getting a fix…');
+  this.textContent='Stop tracking';
+  watchId = navigator.geolocation.watchPosition(function(p){
+    var c=p.coords; placeMe(c.latitude,c.longitude,c.accuracy);
+    map.setView([c.latitude,c.longitude], Math.max(map.getZoom(),10));
+    update(c.latitude,c.longitude,c.speed);
+    setState('<span class="dot" style="background:#39ff8b"></span>Live');
+    pushPosition(c.latitude,c.longitude);
+  }, function(err){
+    setState('Location blocked: '+err.message+' (needs HTTPS + permission)');
+  }, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
+});
+document.getElementById('fitBtn').addEventListener('click', function(){ initMap(); fitRoute(); });
+function setState(h){ document.getElementById('trackState').innerHTML=h; }
+
+// ----- Optional convoy mode (Firebase Realtime DB) -----
+function getCrew(){ var m=location.search.match(/[?&]crew=([^&]+)/); return m?decodeURIComponent(m[1]):null; }
+function initConvoy(){
+  var el=document.getElementById('convoyState');
+  crew=getCrew();
+  if(!FIREBASE_CONFIG){ el.innerHTML='<p class="mut">Solo mode (no Firebase config). Only your phone shows.</p>'; return; }
+  if(!crew){ el.innerHTML='<p class="yellow">Config found. Add <code>?crew=callahan</code> to the URL on each phone to join the convoy.</p>'; return; }
+  var s1=document.createElement('script'); s1.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
+  s1.onload=function(){
+    var s2=document.createElement('script'); s2.src='https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js';
+    s2.onload=function(){
+      firebase.initializeApp(FIREBASE_CONFIG); db=firebase.database();
+      var me='car-'+Math.floor((performance.now()%100000));
+      window.__me=me;
+      db.ref('trips/'+crew).on('value',function(snap){
+        var v=snap.val()||{};
+        Object.keys(v).forEach(function(k){
+          if(k===me) return; var d=v[k]; if(!d||d.lat==null) return;
+          if(!peers[k]){ peers[k]=L.circleMarker([d.lat,d.lng],{radius:9,color:'#fff',weight:2,fillColor:'#ffd23f',fillOpacity:1}).addTo(map).bindPopup('Other car'); }
+          else peers[k].setLatLng([d.lat,d.lng]);
+        });
+      });
+      el.innerHTML='<p class="green"><span class="dot" style="background:#39ff8b"></span>Convoy mode on, crew <code>'+crew+'</code>. Other cars show as yellow pins.</p>';
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+}
+function pushPosition(lat,lng){
+  if(db && crew && window.__me){ db.ref('trips/'+crew+'/'+window.__me).set({lat:lat,lng:lng,t:Date.now()}); }
+}
+
+// ----- Tabs -----
+document.querySelectorAll('#tabs button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#tabs button').forEach(function(x){x.classList.remove('on');});
+    this.classList.add('on');
+    var t=this.dataset.t;
+    document.querySelectorAll('section.tab').forEach(function(s){s.classList.remove('on');});
+    document.getElementById(t==='map'?'map-tab':t).classList.add('on');
+    if(t==='map'){ setTimeout(function(){ initMap(); map.invalidateSize(); }, 60); }
+    if(t==='park' && window.onParkTabShown){ setTimeout(window.onParkTabShown, 60); }
+  });
+});
+
+// ----- Countdown + clocks -----
+function depart(){ // Thu 6/18/2026 13:00 Central (1pm)
+  return new Date('2026-06-18T13:00:00-05:00');
+}
+function tick(){
+  var now=new Date(), d=depart()-now;
+  var box=document.getElementById('count');
+  if(d>0){
+    var days=Math.floor(d/864e5), h=Math.floor(d/36e5)%24, m=Math.floor(d/6e4)%60, s=Math.floor(d/1e3)%60;
+    box.innerHTML = cell(days,'days')+cell(h,'hrs')+cell(m,'min')+cell(s,'sec');
+  } else { box.innerHTML='<div class="box" style="min-width:auto"><div class="n" style="font-size:18px">Wheels up. Drive safe.</div></div>'; }
+  var ct=now.toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
+  var et=now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+  document.getElementById('clocks').innerHTML='Home <b>'+ct+'</b> CT &nbsp;&middot;&nbsp; Sandusky <b>'+et+'</b> ET';
+}
+function cell(n,l){ return '<div class="box"><div class="n">'+String(n).padStart(2,'0')+'</div><div class="l">'+l+'</div></div>'; }
+setInterval(tick,1000); tick();
+
+// ----- Packing checklist persistence -----
+(function(){
+  var boxes=Array.prototype.slice.call(document.querySelectorAll('#packGrid input'));
+  boxes.forEach(function(b,i){b.dataset.k='p'+i;});
+  var KEY='callahan-pack';
+  var s={}; try{s=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){}
+  boxes.forEach(function(b){ if(s[b.dataset.k]) b.checked=true;
+    b.addEventListener('change',function(){ var o={}; boxes.forEach(function(x){if(x.checked)o[x.dataset.k]=1;}); localStorage.setItem(KEY,JSON.stringify(o)); });
+  });
+})();
+
+initConvoy();
+</script>
+<script src="assets/park.js"></script>
+</body>
+</html>
