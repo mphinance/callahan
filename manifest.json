@@ -1,13 +1,13 @@
 {
-  "name": "Summer Blast West · Bear",
-  "short_name": "Summer Blast",
-  "description": "Day-of pocket app for PAC Summer Blast Adventure WEST: live schedule, campus map, and find-me GPS. Built with Daykit.",
+  "name": "Are We There Yet?",
+  "short_name": "AreWeThereYet",
+  "description": "A drop-in pocket app for a day or a whole trip: live schedule, arrival countdown, map with find-me GPS, and an offline itinerary. Built from photos of a paper schedule or map.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#fff7ea",
-  "theme_color": "#f28c1a",
+  "background_color": "#f3f6fb",
+  "theme_color": "#2f80c4",
   "icons": [
     { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

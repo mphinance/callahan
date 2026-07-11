@@ -1,6 +1,6 @@
 # Make a new day or trip from photos
 
-Daykit's whole point: you should never hand-write `event.json`. You take a
+The whole point: you should never hand-write `event.json`. You take a
 couple of photos and let Claude turn them into structured data with real GPS
 coordinates. This works for a single day (a camp, a conference) or a whole
 trip (a vacation, a road trip).
@@ -24,7 +24,7 @@ corner.
 ### Single day
 
 > Here are photos of an event: a schedule grid, a map of the venue, and its
-> location. Build me a Daykit `event.json` following the schema in `SPEC.md`.
+> location. Build me a Are We There Yet? `event.json` following the schema in `SPEC.md`.
 >
 > - I am on the **____** team / track, so use that column of the schedule.
 > - The event is on **____ (date)** at **____ (venue, town)**.
@@ -61,8 +61,8 @@ output looks like.
 ## 3. Drop it in and ship
 
 1. Replace `event.json` with the new one.
-2. Bump the `CACHE` version string in `sw.js` (e.g. `daykit-v4` ->
-   `daykit-v5`) so installed phones pull the fresh data.
+2. Bump the `CACHE` version string in `sw.js` (e.g. `daykit-v6` ->
+   `daykit-v7`) so installed phones pull the fresh data.
 3. Update `name` / `short_name` / `description` in `manifest.json`.
 4. Optionally regenerate icons with `node gen-icons.js` for a new look.
 5. Commit and redeploy. Everyone re-opens the page and installs the new one.
