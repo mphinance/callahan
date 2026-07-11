@@ -56,6 +56,12 @@ Three tabs, no backend, no build step.
   nearest stop, "Mark my car" saves where you parked, "Save offline" caches
   the visible tiles so the map keeps working with no signal, and tapping any
   pin lets you jot a note.
+- **Kids** - The back-seat tab that earns the app its name. A big glanceable
+  "Are we there yet?" answer with a car driving along a road toward the finish,
+  a kid-worded countdown ("7 minutes until Bottle Rockets"), and a talking
+  button that says the answer out loud. Kids collect a sticker for every stop
+  they reach (with confetti), and three offline boredom-busters are built in:
+  Bingo, Spot It, and I Spy.
 - **Info** - Location and Open-in-Maps, an Add-to-Calendar export (.ics), a
   Share button, where you're staying, a saved packing checklist, live weather,
   reminder controls, a light/dark appearance toggle, and good-to-know notes.

@@ -82,12 +82,12 @@
   /* Tabs */
   nav.tabs {
     position: sticky; top: 0; z-index: 480;
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(4, 1fr);
     background: var(--card); border-bottom: 1px solid var(--line);
   }
   nav.tabs button {
     appearance: none; border: 0; background: none; cursor: pointer;
-    padding: 11px 4px 9px; font-size: 13px; font-weight: 700; color: var(--muted);
+    padding: 11px 2px 9px; font-size: 12px; font-weight: 700; color: var(--muted);
     border-bottom: 3px solid transparent; font-family: inherit;
   }
   nav.tabs button .ic { display: block; font-size: 18px; line-height: 1; margin-bottom: 3px; }
@@ -238,6 +238,39 @@
   .loading { text-align: center; padding: 40px 0; color: var(--muted); }
   footer { text-align: center; font-size: 11px; color: var(--muted); padding: 8px 0 4px; }
   code { background: var(--codebg); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
+
+  /* Kid mode */
+  .hero { text-align: center; background: linear-gradient(160deg, var(--card), var(--nowtint)); border: 2px solid var(--primary); border-radius: 18px; padding: 20px 14px; margin: 0 0 12px; }
+  .hero .kidq { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .hero .kidbig { font-size: 34px; font-weight: 900; line-height: 1.02; margin: 6px 0 2px; }
+  .hero .kidsub { color: var(--muted); font-weight: 700; font-size: 15px; }
+  .road { position: relative; height: 60px; margin: 18px 2px 2px; border-radius: 12px; background: #5b6675; overflow: hidden; }
+  .road::before { content: ""; position: absolute; top: 50%; left: 8px; right: 8px; height: 4px; transform: translateY(-50%); background: repeating-linear-gradient(90deg, #ffd24d 0 16px, transparent 16px 32px); }
+  .road .flag { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 28px; }
+  .road .car { position: absolute; left: 4%; top: 50%; transform: translate(-50%,-50%); font-size: 32px; transition: left 1.2s ease; }
+  .road .car.rev { transform: translate(-50%,-50%) scaleX(-1); }
+  .talkbtn { margin-top: 16px; font-size: 17px; padding: 15px 20px; }
+  .stickers { display: flex; flex-wrap: wrap; gap: 8px; min-height: 20px; }
+  .sticker { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--nowtint); border: 2px solid var(--sun); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .games .btn { margin-right: 8px; margin-bottom: 4px; }
+  .games .btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .bingo { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .bingo .cell { aspect-ratio: 1; border: 1px solid var(--line); border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 10.5px; font-weight: 700; padding: 3px; cursor: pointer; background: var(--card); line-height: 1.05; }
+  .bingo .cell.marked { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .bingo .cell.free { background: var(--sun); color: #3a2a00; }
+  .spotlist { list-style: none; margin: 0; padding: 0; }
+  .spotlist li { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 700; cursor: pointer; }
+  .spotlist li:last-child { border-bottom: 0; }
+  .spotlist li.got { color: var(--muted); }
+  .spotlist li.got .lbl { text-decoration: line-through; }
+  .spotlist li .box { width: 24px; height: 24px; border: 2px solid var(--line); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; color: #fff; }
+  .spotlist li.got .box { background: var(--good); border-color: var(--good); }
+  .ispy { text-align: center; font-size: 24px; font-weight: 900; padding: 18px 6px; line-height: 1.2; }
+  .gamebar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+  .gamebar .btn { padding: 8px 12px; font-size: 13px; }
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 900; overflow: hidden; }
+  .confetti span { position: absolute; top: -8%; font-size: 22px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(115vh) rotate(400deg); opacity: .85; } }
 </style>
 </head>
 <body>
@@ -251,6 +284,7 @@
 <nav class="tabs" role="tablist">
   <button role="tab" aria-selected="true" data-tab="schedule"><span class="ic">🗓️</span>Schedule</button>
   <button role="tab" aria-selected="false" data-tab="map"><span class="ic">🗺️</span>Map</button>
+  <button role="tab" aria-selected="false" data-tab="kids"><span class="ic">🚗</span>Kids</button>
   <button role="tab" aria-selected="false" data-tab="info"><span class="ic">ℹ️</span>Info</button>
 </nav>
 
@@ -278,6 +312,24 @@
     <div id="map"></div>
     <div class="locstat muted" id="locStat">Tap "Find me" to drop your live location. Tap a pin to add a note.</div>
     <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="tab" id="tab-kids">
+    <div id="kidHero"></div>
+    <div class="card">
+      <h2>My stickers <span class="muted small" id="stickCount"></span></h2>
+      <div class="stickers" id="stickers"></div>
+      <p class="small muted" id="stickHint" style="margin:8px 0 0">Reach each stop to collect a sticker.</p>
+    </div>
+    <div class="card games">
+      <h2>Boredom busters</h2>
+      <div>
+        <button class="btn ghost" data-game="bingo">🎉 Bingo</button>
+        <button class="btn ghost" data-game="spot">🚙 Spot It</button>
+        <button class="btn ghost" data-game="ispy">👀 I Spy</button>
+      </div>
+      <div id="gameArea" style="margin-top:12px"></div>
+    </div>
   </section>
 
   <section class="tab" id="tab-info">
@@ -887,6 +939,7 @@ function showTab(name){
     s.classList.toggle("active", s.id==="tab-"+name);
   });
   if(name==="map"){ initMap(); setTimeout(function(){ if(map) map.invalidateSize(); },60); }
+  if(name==="kids"){ renderKids(); }
   try { history.replaceState(null,"","#"+name); } catch(e){}
 }
 
@@ -899,10 +952,11 @@ function tick(){
 }
 function startClock(){
   if(tickTimer) clearInterval(tickTimer);
+  lastRederive=Date.now();   // first full re-derive happens ~20s in, not on the first tick
   tick();
   tickTimer=setInterval(function(){
     tick();
-    if(Date.now()-lastRederive >= 20000){ lastRederive=Date.now(); renderNow(); renderSchedule(); renderNudge(); }
+    if(Date.now()-lastRederive >= 20000){ lastRederive=Date.now(); renderNow(); renderSchedule(); renderNudge(); if(document.getElementById("tab-kids").classList.contains("active")) renderKids(); }
   }, 1000);
 }
 
@@ -1057,6 +1111,204 @@ function scrollToNow(){
   if(el){ try{ el.scrollIntoView({block:"center", behavior:"smooth"}); }catch(e){ el.scrollIntoView(); } }
 }
 
+/* ---------- kid mode ---------- */
+function kidMins(m){
+  if(m<=0) return "any second";
+  if(m<2) return "1 minute";
+  if(m<45) return m+" minutes";
+  var h=Math.round(m/60); return "about "+h+" hour"+(h>1?"s":"");
+}
+function speak(t){
+  try { if(window.speechSynthesis){ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.rate=1; u.pitch=1.1; speechSynthesis.speak(u); } } catch(e){}
+}
+var KID_CHEERS=["Not yet!","Almost there!","Getting close!","Soon!","Hang tight!","Pretty soon!"];
+var kidCheerIx=0;
+function nextPlaceName(it){ var p=it.place && placeById[it.place]; return p ? p.name : it.title; }
+function kidState(){
+  var ti=todayIndex();
+  if(ti<0){
+    var ts=tripStatus();
+    if(ts.phase==="pre"){ var d=ts.days; return { big:"Not yet!", sub:d+" sleep"+(d===1?"":"s")+" until we go!", pct:0, spoken:"Not yet. "+d+" more sleep"+(d===1?"":"s")+"." }; }
+    return { big:"All done!", sub:"That adventure is over. See you next time!", pct:100, spoken:"All done. See you next time!" };
+  }
+  var day=EV.days[ti], tz=dayTz(day), now=new Date().getTime();
+  var cur=null, nxt=null, nowD=new Date();
+  for(var i=0;i<day.schedule.length;i++){ var st=statusOf(day.schedule[i], day, nowD); if(st==="now"&&!cur)cur=day.schedule[i]; if(st==="future"&&!nxt)nxt=day.schedule[i]; }
+  var pct=0;
+  if(day.schedule.length){
+    var ds=zonedEpoch(day.date, day.schedule[0].start, tz), de=zonedEpoch(day.date, day.schedule[day.schedule.length-1].end, tz);
+    pct = de>ds ? clamp(Math.round((now-ds)/(de-ds)*100)) : 0;
+  }
+  if(cur){
+    var e=zonedEpoch(day.date, cur.end, tz), mins=Math.ceil((e-now)/60000);
+    var dest = nxt ? nextPlaceName(nxt) : "the finish";
+    return { big:"Not yet!", sub:kidMins(mins)+(nxt?" until "+dest:" to go"), pct:pct, spoken:"Not yet! About "+kidMins(mins)+(nxt?" until "+dest:" to go")+"." };
+  }
+  if(nxt){
+    var ns=zonedEpoch(day.date, nxt.start, tz), mm=Math.ceil((ns-now)/60000);
+    return { big:"Almost!", sub:kidMins(mm)+" until "+nextPlaceName(nxt), pct:pct, spoken:"Almost! About "+kidMins(mm)+" until "+nextPlaceName(nxt)+"." };
+  }
+  var first=day.schedule[0];
+  if(first && now<zonedEpoch(day.date, first.start, tz)){
+    var fm=Math.ceil((zonedEpoch(day.date, first.start, tz)-now)/60000);
+    return { big:"Soon!", sub:kidMins(fm)+" until we start", pct:0, spoken:"Soon! About "+kidMins(fm)+" until we start." };
+  }
+  return { big:"We’re here! 🎉", sub:"You made it. Great job!", pct:100, spoken:"We are here! We made it!" };
+}
+function renderKids(){
+  var hero=document.getElementById("kidHero");
+  var ks=kidState();
+  var reverse = ""; // car faces right toward the flag
+  hero.innerHTML=
+    '<div class="hero">'+
+      '<div class="kidq">Are we there yet?</div>'+
+      '<div class="kidbig" id="kidBig">'+esc(ks.big)+'</div>'+
+      '<div class="kidsub" id="kidSub">'+esc(ks.sub)+'</div>'+
+      '<div class="road"><span class="flag">🏁</span><span class="car'+reverse+'" id="kidCar" style="left:'+Math.max(4,Math.min(92,ks.pct))+'%">🚗</span></div>'+
+      '<button class="btn primary talkbtn" id="talkBtn">🔊 Are we there yet?</button>'+
+    '</div>';
+  var tb=document.getElementById("talkBtn");
+  if(tb) tb.addEventListener("click", function(){
+    var s=kidState();
+    var lead = s.pct>=100 ? "We made it!" : KID_CHEERS[(kidCheerIx++)%KID_CHEERS.length];
+    document.getElementById("kidBig").textContent = s.pct>=100 ? "We’re here! 🎉" : lead;
+    speak(s.spoken);
+    if(s.pct>=100) confetti();
+  });
+
+  // stickers
+  var res=updateStickers();
+  var wrap=document.getElementById("stickers"), cnt=document.getElementById("stickCount"), hint=document.getElementById("stickHint");
+  if(wrap){
+    wrap.innerHTML = res.list.length
+      ? res.list.map(function(s){ return '<span class="sticker" title="'+esc(s.name)+'">'+s.icon+'</span>'; }).join("")
+      : '<span class="small muted">None yet. Your first sticker unlocks when you reach a stop.</span>';
+    if(cnt) cnt.textContent = res.list.length ? "("+res.list.length+")" : "";
+    if(hint) hint.textContent = res.list.length ? "Nice collecting! Keep going." : "Reach each stop to collect a sticker.";
+  }
+  if(res.isNew && document.getElementById("tab-kids").classList.contains("active")) confetti();
+}
+function stickerKey(){
+  var ti=todayIndex();
+  var d = ti>=0 ? EV.days[ti].date : (EV.days[curDay] ? EV.days[curDay].date : "x");
+  return "daykit:"+EV.id+":stickers:"+d;
+}
+function updateStickers(){
+  var ti=todayIndex();
+  var earned=[];
+  try { earned=JSON.parse(localStorage.getItem(stickerKey())||"[]"); } catch(e){ earned=[]; }
+  if(ti<0) return { list:earned, isNew:false };
+  var day=EV.days[ti], now=new Date(), seen={}, isNew=false;
+  earned.forEach(function(s){ seen[s.id]=1; });
+  day.schedule.forEach(function(it){
+    if(!it.place || !placeById[it.place]) return;
+    if(statusOf(it, day, now)!=="past") return;
+    var id=it.place+"@"+it.start;
+    if(seen[id]) return;
+    var p=placeById[it.place];
+    earned.push({ id:id, icon:(ICONS[p.icon]||"⭐"), name:p.name });
+    seen[id]=1; isNew=true;
+  });
+  if(isNew){ try { localStorage.setItem(stickerKey(), JSON.stringify(earned)); } catch(e){} }
+  return { list:earned, isNew:isNew };
+}
+function confetti(){
+  var c=document.createElement("div"); c.className="confetti";
+  var em=["🎉","⭐","🚗","🎊","🏁","✨"];
+  for(var i=0;i<30;i++){
+    var s=document.createElement("span");
+    s.textContent=em[i%em.length];
+    s.style.left=(Math.random()*100)+"%";
+    s.style.animationDuration=(2+Math.random()*2)+"s";
+    s.style.animationDelay=(Math.random()*0.4)+"s";
+    c.appendChild(s);
+  }
+  document.body.appendChild(c);
+  setTimeout(function(){ c.remove(); }, 4400);
+}
+
+/* ---------- games ---------- */
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+var BINGO_ITEMS=["Red car","School bus","Cow","Horse","Bridge","Tunnel","Motorcycle","Police car","Dog in a car","RV / camper","Boat on trailer","Water tower","Windmill","Tractor","Out-of-state plate","Semi truck","Yellow car","Flag","Gas station","Big bird","Roadwork","Barn","Lake","Church"];
+var SPOT_ITEMS=["🚚 Semi truck","🚌 School bus","🏍️ Motorcycle","🚓 Police car","🐄 Cow","🐎 Horse","🌉 Bridge","🚐 RV / camper","🚜 Tractor","🐕 Dog in a car","⛽ Gas station","🚩 A flag","🛥️ Boat on a trailer","🗼 Water tower","🚁 Helicopter"];
+var ISPY_ITEMS=["something RED 🔴","something ROUND ⚪","a TREE 🌳","another CAR 🚗","something BLUE 🔵","an ANIMAL 🐾","a SIGN 🪧","something GREEN 🟢","a TRUCK 🚚","a BUILDING 🏢","something YELLOW 🟡","some WATER 💧","a BIRD 🐦","something with WHEELS 🛞"];
+var gameKeyBase; function gk(g){ return "daykit:"+EV.id+":game:"+g; }
+function load(g,def){ try { var v=JSON.parse(localStorage.getItem(gk(g))||"null"); return v||def; } catch(e){ return def; } }
+function save(g,v){ try { localStorage.setItem(gk(g), JSON.stringify(v)); } catch(e){} }
+
+function newBingoState(){
+  var pool=shuffle(BINGO_ITEMS.slice()).slice(0,24);
+  pool.splice(12,0,"FREE");
+  return { cells:pool, marked:{12:true}, won:false };
+}
+function bingoWon(marked){
+  var lines=[];
+  for(var r=0;r<5;r++){ var row=[],col=[]; for(var c=0;c<5;c++){ row.push(r*5+c); col.push(c*5+r); } lines.push(row,col); }
+  lines.push([0,6,12,18,24],[4,8,12,16,20]);
+  return lines.some(function(l){ return l.every(function(i){ return marked[i]; }); });
+}
+function renderBingo(){
+  var st=load("bingo", null); if(!st || !st.cells){ st=newBingoState(); save("bingo",st); }
+  var area=document.getElementById("gameArea");
+  area.innerHTML='<div class="gamebar"><b>Bingo</b><button class="btn ghost" id="bingoNew">New card</button></div><div class="bingo" id="bingoGrid"></div>';
+  var grid=document.getElementById("bingoGrid");
+  st.cells.forEach(function(txt, i){
+    var d=document.createElement("div");
+    d.className="cell"+(st.marked[i]?" marked":"")+(txt==="FREE"?" free":"");
+    d.textContent = txt==="FREE" ? "FREE ⭐" : txt;
+    d.addEventListener("click", function(){
+      if(i===12) return;
+      if(st.marked[i]) delete st.marked[i]; else st.marked[i]=true;
+      d.classList.toggle("marked");
+      save("bingo",st);
+      if(!st.won && bingoWon(st.marked)){ st.won=true; save("bingo",st); confetti(); alertBingo(); }
+    });
+    grid.appendChild(d);
+  });
+  document.getElementById("bingoNew").addEventListener("click", function(){ var ns=newBingoState(); save("bingo",ns); renderBingo(); });
+}
+function alertBingo(){
+  var area=document.getElementById("gameArea");
+  var b=document.createElement("div"); b.className="ispy"; b.textContent="🎉 BINGO! 🎉";
+  area.insertBefore(b, area.firstChild);
+  speak("Bingo! You win!");
+  setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 3000);
+}
+function renderSpot(){
+  var got=load("spot", {});
+  var area=document.getElementById("gameArea");
+  var found=SPOT_ITEMS.filter(function(x){ return got[x]; }).length;
+  area.innerHTML='<div class="gamebar"><b>Spot It — found '+found+' of '+SPOT_ITEMS.length+'</b><button class="btn ghost" id="spotReset">Reset</button></div><ul class="spotlist" id="spotList"></ul>';
+  var ul=document.getElementById("spotList");
+  SPOT_ITEMS.forEach(function(x){
+    var li=document.createElement("li");
+    if(got[x]) li.className="got";
+    li.innerHTML='<span class="box">'+(got[x]?"✓":"")+'</span><span class="lbl">'+x+'</span>';
+    li.addEventListener("click", function(){
+      if(got[x]) delete got[x]; else got[x]=true;
+      save("spot",got);
+      var f=SPOT_ITEMS.filter(function(y){ return got[y]; }).length;
+      if(f===SPOT_ITEMS.length) confetti();
+      renderSpot();
+    });
+    ul.appendChild(li);
+  });
+  document.getElementById("spotReset").addEventListener("click", function(){ save("spot",{}); renderSpot(); });
+}
+function renderISpy(){
+  var area=document.getElementById("gameArea");
+  var pick=ISPY_ITEMS[Math.floor(Math.random()*ISPY_ITEMS.length)];
+  area.innerHTML='<div class="ispy">I spy with my little eye…<br>'+pick+'</div>'+
+    '<div style="text-align:center"><button class="btn primary" id="ispyNext">Next one 👀</button></div>';
+  document.getElementById("ispyNext").addEventListener("click", renderISpy);
+}
+function openGame(which){
+  document.querySelectorAll('.games [data-game]').forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-game")===which ? "true":"false"); });
+  if(which==="bingo") renderBingo();
+  else if(which==="spot") renderSpot();
+  else renderISpy();
+}
+
 /* ---------- boot ---------- */
 function normalizeDays(data){
   if(Array.isArray(data.days) && data.days.length){
@@ -1091,6 +1343,7 @@ function boot(){
     renderSchedule();
     renderInfo();
     renderWeather();
+    renderKids();
     syncAllPinsBtn();
     document.getElementById("foot").textContent="Are We There Yet? · map data © OpenStreetMap · offline-ready";
     startClock();
@@ -1117,6 +1370,9 @@ document.getElementById("allPinsBtn").addEventListener("click", function(){
   initMap(); if(map){ refreshMarkers(); fitDay(); }
 });
 document.getElementById("recenter").addEventListener("click", function(){ initMap(); if(map) fitDay(); });
+document.querySelectorAll('.games [data-game]').forEach(function(b){
+  b.addEventListener("click", function(){ openGame(b.getAttribute("data-game")); });
+});
 
 /* react to system light/dark changes when on Auto */
 if(window.matchMedia){
