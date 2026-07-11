@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Daykit</title>
-<meta name="description" content="A drop-in day or trip pocket app: schedule, live map, and offline itinerary." />
+<title>Are We There Yet?</title>
+<meta name="description" content="A drop-in day or trip pocket app: schedule, live map, arrival countdown, and offline itinerary." />
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#f28c1a" />
+<meta name="theme-color" content="#2f80c4" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Daykit" />
+<meta name="apple-mobile-web-app-title" content="Are We There Yet?" />
 <link rel="apple-touch-icon" href="assets/icon-192.png" />
+
+<!-- Set stored light/dark before first paint to avoid a flash -->
+<script>(function(){try{var t=localStorage.getItem('daykit:theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 
 <!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -20,19 +23,33 @@
 
 <style>
   :root {
-    --primary: #f28c1a;
-    --accent: #e4562b;
-    --sun: #f2b21a;
-    --water: #1d9bd1;
-    --ink: #2a1a00;
-    --bg: #fff7ea;
+    --primary: #2f80c4;
+    --accent: #ef7d3b;
+    --sun: #ffc24b;
+    --water: #2f9fd0;
+    --ink: #1a2230;
+    --bg: #f3f6fb;
     --card: #ffffff;
-    --muted: #7a6a52;
-    --line: #f0e2cb;
+    --muted: #6a7686;
+    --line: #e2e8f2;
     --good: #2e9e5b;
+    --nowtint: #eef6ff;
+    --alltint: #f0edff;
+    --codebg: #eef2f8;
+    --sheet: #1b2431;
     --pastdim: 0.5;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e7edf5; --bg: #10141b; --card: #1a212c; --muted: #95a2b4; --line: #2a3340;
+      --nowtint: #202a3b; --alltint: #251f36; --codebg: #28313f; --sheet: #232d3b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e7edf5; --bg: #10141b; --card: #1a212c; --muted: #95a2b4; --line: #2a3340;
+    --nowtint: #202a3b; --alltint: #251f36; --codebg: #28313f; --sheet: #232d3b;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -107,10 +124,7 @@
   .daychip[aria-selected="true"].today .d2::after { color: #fff; }
 
   /* Now banner */
-  .now {
-    background: linear-gradient(135deg, #fff, #fff6e6);
-    border: 2px solid var(--primary);
-  }
+  .now { background: linear-gradient(135deg, var(--card), var(--nowtint)); border: 2px solid var(--primary); }
   .now .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; color: var(--accent); }
   .now .title { font-size: 22px; font-weight: 800; margin: 2px 0; }
   .now .when { font-size: 14px; color: var(--muted); font-weight: 600; }
@@ -120,11 +134,15 @@
   .now .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .now .actions .btn { padding: 10px 13px; font-size: 14px; }
 
+  /* Progress bar (are we there yet) */
+  .prog { height: 9px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 12px; }
+  .prog > i { display: block; height: 100%; background: linear-gradient(90deg, var(--sun), var(--accent)); border-radius: 999px; transition: width .6s ease; }
+  .progcap { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 6px; }
+
   /* Weather strip */
   .wx {
     display: flex; align-items: center; gap: 10px; margin: 0 0 12px;
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
-    font-size: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 14px;
   }
   .wx .big { font-size: 24px; }
   .wx .now-t { font-weight: 800; font-size: 16px; }
@@ -134,15 +152,15 @@
   .nudge {
     display: flex; align-items: center; gap: 10px; margin: 0 0 12px; flex-wrap: wrap;
     background: var(--accent); color: #fff; border-radius: 12px; padding: 12px 14px;
-    box-shadow: 0 3px 12px rgba(228,86,43,.32); animation: pulse 1.6s ease-in-out infinite;
+    box-shadow: 0 3px 12px rgba(239,125,59,.32); animation: pulse 1.6s ease-in-out infinite;
   }
   .nudge .msg { flex: 1; font-weight: 700; font-size: 14px; min-width: 160px; }
   .nudge .btn { background: #fff; color: var(--accent); padding: 8px 12px; text-decoration: none; }
-  @keyframes pulse { 0%,100%{ box-shadow: 0 3px 12px rgba(228,86,43,.30);} 50%{ box-shadow: 0 3px 20px rgba(228,86,43,.55);} }
+  @keyframes pulse { 0%,100%{ box-shadow: 0 3px 12px rgba(239,125,59,.30);} 50%{ box-shadow: 0 3px 20px rgba(239,125,59,.55);} }
 
   /* All-group blocks stand out */
-  ol.sched li.is-all { background: #f4efff; box-shadow: inset 3px 0 0 #6d4bd6; border-radius: 8px; }
-  ol.sched li.is-all.is-now { background: #fff6e6; }
+  ol.sched li.is-all { background: var(--alltint); box-shadow: inset 3px 0 0 #6d4bd6; border-radius: 8px; }
+  ol.sched li.is-all.is-now { background: var(--nowtint); }
 
   /* Schedule list */
   ol.sched { list-style: none; margin: 0; padding: 0; }
@@ -155,10 +173,10 @@
   ol.sched .what { font-weight: 700; font-size: 15px; }
   ol.sched .what .sub { display: block; font-weight: 500; font-size: 12px; color: var(--muted); }
   ol.sched .go {
-    appearance: none; border: 1px solid var(--line); background: #fff; border-radius: 9px;
+    appearance: none; border: 1px solid var(--line); background: var(--card); border-radius: 9px;
     width: 34px; height: 34px; font-size: 15px; cursor: pointer; color: var(--accent);
   }
-  ol.sched li.is-now { background: #fff6e6; border-radius: 10px; box-shadow: inset 0 0 0 2px var(--primary); }
+  ol.sched li.is-now { background: var(--nowtint); border-radius: 10px; box-shadow: inset 0 0 0 2px var(--primary); }
   ol.sched li.is-now .what::after { content: " • NOW"; color: var(--accent); font-size: 11px; font-weight: 800; }
   ol.sched li.is-past { opacity: var(--pastdim); }
   ol.sched li.is-past .what { text-decoration: line-through; text-decoration-color: var(--line); }
@@ -172,12 +190,12 @@
     font-size: 14px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
   }
   .btn.primary { background: var(--accent); color: #fff; }
-  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
   .btn:active { transform: translateY(1px); }
   .locstat { font-size: 13px; margin-top: 8px; }
   .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; margin-top: 10px; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 2px solid var(--card); box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
 
   .pin {
     display:flex; align-items:center; justify-content:center;
@@ -185,6 +203,7 @@
     transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,.35);
     font-size: 15px;
   }
+  .pin.hasnote { box-shadow: 0 0 0 3px var(--sun), 0 2px 5px rgba(0,0,0,.35); }
   .pin > span { transform: rotate(45deg); }
   .pin.me { border-radius: 50%; background: var(--water); }
 
@@ -203,10 +222,11 @@
   .lodge { border-bottom: 1px solid var(--line); padding: 9px 0; font-size: 14px; }
   .lodge:last-child { border-bottom: 0; }
   .lodge b { display: block; }
+  .actrow { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 
   .installbar {
     position: fixed; left: 12px; right: 12px; bottom: calc(12px + var(--safe-bottom)); z-index: 700;
-    background: var(--ink); color: #fff; border-radius: 12px; padding: 12px 14px;
+    background: var(--sheet); color: #fff; border-radius: 12px; padding: 12px 14px;
     display: none; align-items: center; gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.3);
     max-width: 700px; margin: 0 auto;
   }
@@ -217,13 +237,13 @@
 
   .loading { text-align: center; padding: 40px 0; color: var(--muted); }
   footer { text-align: center; font-size: 11px; color: var(--muted); padding: 8px 0 4px; }
-  code { background: #f3ead6; padding: 1px 4px; border-radius: 4px; font-size: 12px; }
+  code { background: var(--codebg); padding: 1px 4px; border-radius: 4px; font-size: 12px; }
 </style>
 </head>
 <body>
 
 <header class="app">
-  <div class="eyebrow" id="hdrEyebrow">Daykit</div>
+  <div class="eyebrow" id="hdrEyebrow">Are We There Yet?</div>
   <h1 id="hdrTitle">Loading...</h1>
   <div class="meta" id="hdrMeta"></div>
 </header>
@@ -252,10 +272,11 @@
       <button class="btn primary" id="findMe">📍 Find me</button>
       <button class="btn ghost" id="parkBtn">🚗 Mark my car</button>
       <button class="btn ghost" id="allPinsBtn" hidden>Show all stops</button>
+      <button class="btn ghost" id="saveTilesBtn">⤓ Save offline</button>
       <button class="btn ghost" id="recenter">Recenter</button>
     </div>
     <div id="map"></div>
-    <div class="locstat muted" id="locStat">Tap "Find me" to drop your live location.</div>
+    <div class="locstat muted" id="locStat">Tap "Find me" to drop your live location. Tap a pin to add a note.</div>
     <div class="legend" id="legend"></div>
   </section>
 
@@ -273,22 +294,20 @@
 <footer id="foot"></footer>
 
 <script>
-/* ---------- Daykit: a drop-in day OR multi-day trip PWA driven by event.json ---------- */
-var EV = null;                 // the loaded event
-var placeById = {};            // id -> place
-var isMulti = false;           // more than one day
-var curDay = 0;                // selected day index
-var showAllPins = false;       // map: show every stop vs just this day
+/* ---------- Are We There Yet? : a drop-in day OR multi-day trip PWA driven by event.json ---------- */
+var EV = null;
+var placeById = {};
+var isMulti = false;
+var curDay = 0;
+var showAllPins = false;
 var map = null, meMarker = null, markers = {}, watchId = null, carMarker = null;
 var tickTimer = null;
-var myPos = null;              // last known GPS fix, once "Find me" is on
+var myPos = null;
 
-function walkUrl(p){
-  return "https://www.google.com/maps/dir/?api=1&destination="+p.lat+","+p.lng+"&travelmode=walking";
-}
-function searchUrl(o){
-  return "https://www.google.com/maps/search/?api=1&query="+o.lat+","+o.lng;
-}
+function walkUrl(p){ return "https://www.google.com/maps/dir/?api=1&destination="+p.lat+","+p.lng+"&travelmode=walking"; }
+function searchUrl(o){ return "https://www.google.com/maps/search/?api=1&query="+o.lat+","+o.lng; }
+function clamp(n){ return Math.max(0, Math.min(100, n)); }
+function pad2(n){ return String(n).padStart(2,"0"); }
 
 var ICONS = {
   flag:"🚩", compass:"🧭", water:"💦", truck:"🚚", target:"🎯", rocket:"🚀",
@@ -297,7 +316,7 @@ var ICONS = {
   train:"🚆", hike:"🥾", beach:"🏖️", shop:"🛍️", star:"⭐", pin:"📍"
 };
 var KIND_COLOR = {
-  hub:"#6d4bd6", activity:"#e4562b", water:"#1d9bd1", service:"#2e9e5b",
+  hub:"#6d4bd6", activity:"#ef7d3b", water:"#2f9fd0", service:"#2e9e5b",
   lodging:"#b8558f", food:"#e8892b", sight:"#3f7fd6", travel:"#5a5550"
 };
 var KIND_LABEL = {
@@ -305,28 +324,47 @@ var KIND_LABEL = {
   lodging:"Lodging", food:"Food", sight:"Sights", travel:"Travel"
 };
 
-/* ---- time helpers. Times are local wall-clock on each day's date. ---- */
+/* ---- time helpers. Schedule times are wall-clock in the event's timezone. ---- */
 function hm(t){ var p=t.split(":"); return {h:+p[0], m:+p[1]}; }
-function dateAt(dateStr, t){
-  var d = dateStr.split("-"), x = hm(t);
-  return new Date(+d[0], +d[1]-1, +d[2], x.h, x.m, 0, 0);
+function dateAt(dateStr, t){ var d=dateStr.split("-"), x=hm(t); return new Date(+d[0], +d[1]-1, +d[2], x.h, x.m, 0, 0); }
+function dayTz(day){ return (day && day.timezone) || (EV && EV.timezone) || null; }
+function tzOffsetMs(date, tz){
+  var dtf=new Intl.DateTimeFormat("en-US",{ timeZone:tz, hour12:false, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  var m={}; dtf.formatToParts(date).forEach(function(p){ m[p.type]=p.value; });
+  var h = m.hour==="24" ? 0 : +m.hour;
+  var asUTC=Date.UTC(+m.year, +m.month-1, +m.day, h, +m.minute, +m.second);
+  return asUTC - date.getTime();
 }
-function fmt12(t){
-  var x=hm(t), ap = x.h>=12?"pm":"am", h=x.h%12; if(h===0)h=12;
-  return h + (x.m?(":"+String(x.m).padStart(2,"0")):"") + ap;
+/* Absolute epoch (ms) for a wall-clock time on dateStr, interpreted in tz (or device-local if no tz). */
+function zonedEpoch(dateStr, timeStr, tz){
+  if(!tz) return dateAt(dateStr, timeStr).getTime();
+  var d=dateStr.split("-"), t=timeStr.split(":");
+  var asUTC=Date.UTC(+d[0], +d[1]-1, +d[2], +t[0], +t[1], 0);
+  var off=tzOffsetMs(new Date(asUTC), tz);
+  var utc=asUTC-off;
+  var off2=tzOffsetMs(new Date(utc), tz);
+  if(off2!==off) utc=asUTC-off2;   // refine across a DST boundary
+  return utc;
 }
+function todayStrTz(tz){
+  if(!tz){ var n=new Date(); return n.getFullYear()+"-"+pad2(n.getMonth()+1)+"-"+pad2(n.getDate()); }
+  return new Intl.DateTimeFormat("en-CA",{ timeZone:tz, year:"numeric", month:"2-digit", day:"2-digit" }).format(new Date());
+}
+function isTodayD(day){ return day.date === todayStrTz(dayTz(day)); }
+function tzAbbr(day){
+  var tz=dayTz(day); if(!tz) return "";
+  try {
+    var parts=new Intl.DateTimeFormat("en-US",{ timeZone:tz, timeZoneName:"short" }).formatToParts(new Date(zonedEpoch(day.date,"12:00",tz)));
+    var p=parts.filter(function(x){ return x.type==="timeZoneName"; })[0];
+    return p ? p.value : "";
+  } catch(e){ return ""; }
+}
+function fmt12(t){ var x=hm(t), ap=x.h>=12?"pm":"am", h=x.h%12; if(h===0)h=12; return h+(x.m?(":"+pad2(x.m)):"")+ap; }
 function fmtRange(a,b){ return fmt12(a)+" – "+fmt12(b); }
 function fmtDay(dateStr, opts){ return dateAt(dateStr,"12:00").toLocaleDateString(undefined, opts); }
-function isToday(dateStr){
-  var n=new Date(), d=dateStr.split("-");
-  return n.getFullYear()==+d[0] && (n.getMonth()+1)==+d[1] && n.getDate()==+d[2];
-}
-function todayIndex(){
-  for(var i=0;i<EV.days.length;i++){ if(isToday(EV.days[i].date)) return i; }
-  return -1;
-}
-function statusOf(item, dateStr, now){
-  var s=dateAt(dateStr,item.start).getTime(), e=dateAt(dateStr,item.end).getTime(), t=now.getTime();
+function todayIndex(){ for(var i=0;i<EV.days.length;i++){ if(isTodayD(EV.days[i])) return i; } return -1; }
+function statusOf(item, day, now){
+  var s=zonedEpoch(day.date, item.start, dayTz(day)), e=zonedEpoch(day.date, item.end, dayTz(day)), t=now.getTime();
   if(t>=e) return "past";
   if(t>=s) return "now";
   return "future";
@@ -335,17 +373,17 @@ function fmtCountdown(ms){
   if(ms<0) ms=0;
   var s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
   if(h>0) return h+"h "+m+"m";
-  if(m>0) return m+"m "+String(ss).padStart(2,"0")+"s";
+  if(m>0) return m+"m "+pad2(ss)+"s";
   return ss+"s";
 }
 function tripStatus(){
-  var now=Date.now();
-  var firstStart = dateAt(EV.days[0].date,"00:00").getTime();
-  var lastEnd = dateAt(EV.days[EV.days.length-1].date,"23:59").getTime();
-  if(now < firstStart){ return { phase:"pre", days: Math.ceil((firstStart-now)/86400000) }; }
-  if(now > lastEnd){ return { phase:"post" }; }
+  var now=Date.now(), d0=EV.days[0], dN=EV.days[EV.days.length-1];
+  var firstStart=zonedEpoch(d0.date,"00:00",dayTz(d0));
+  var lastEnd=zonedEpoch(dN.date,"23:59",dayTz(dN));
+  if(now<firstStart) return { phase:"pre", days:Math.ceil((firstStart-now)/86400000) };
+  if(now>lastEnd) return { phase:"post" };
   var ti=todayIndex();
-  return { phase:"during", dayNum: (ti>=0?ti+1:null), total: EV.days.length };
+  return { phase:"during", dayNum:(ti>=0?ti+1:null), total:EV.days.length };
 }
 function currentCenter(){
   var day=EV.days[curDay];
@@ -359,15 +397,13 @@ function currentCenter(){
 /* ---------- header ---------- */
 function renderHeader(){
   document.title = EV.title + (EV.team? " · "+EV.team.rank : "");
-  document.getElementById("hdrEyebrow").textContent = EV.subtitle || (isMulti ? "Trip itinerary" : "Daykit");
+  document.getElementById("hdrEyebrow").textContent = EV.subtitle || (isMulti ? "Trip itinerary" : "Are we there yet?");
   document.getElementById("hdrTitle").textContent = EV.title;
   var meta = document.getElementById("hdrMeta");
   meta.innerHTML = "";
   function add(txt){ var s=document.createElement("span"); s.className="badge"; s.textContent=txt; meta.appendChild(s); }
-
   if(isMulti){
-    var first=EV.days[0].date, last=EV.days[EV.days.length-1].date;
-    add("📅 "+fmtDay(first,{month:"short",day:"numeric"})+" – "+fmtDay(last,{month:"short",day:"numeric"}));
+    add("📅 "+fmtDay(EV.days[0].date,{month:"short",day:"numeric"})+" – "+fmtDay(EV.days[EV.days.length-1].date,{month:"short",day:"numeric"}));
     var ts=tripStatus();
     if(ts.phase==="pre") add("⏳ Starts in "+ts.days+" day"+(ts.days===1?"":"s"));
     else if(ts.phase==="post") add("✓ Trip complete");
@@ -375,6 +411,7 @@ function renderHeader(){
   } else {
     add("📅 "+fmtDay(EV.days[0].date,{weekday:"long",month:"long",day:"numeric"}));
   }
+  var ab=tzAbbr(EV.days[curDay]); if(ab) add("🕘 "+ab);
   if(EV.team) add((EV.team.emoji||"👥")+" "+EV.team.rank+(EV.team.name?" · "+EV.team.name:""));
   if(EV.location) add("📍 "+EV.location.name);
 }
@@ -386,7 +423,7 @@ function renderDayStrip(){
   strip.hidden=false; strip.innerHTML="";
   EV.days.forEach(function(day, i){
     var b=document.createElement("button");
-    b.className="daychip"+(isToday(day.date)?" today":"");
+    b.className="daychip"+(isTodayD(day)?" today":"");
     b.setAttribute("aria-selected", i===curDay ? "true":"false");
     b.innerHTML='<div class="d1">'+fmtDay(day.date,{weekday:"short"})+'</div>'+
                 '<div class="d2">'+fmtDay(day.date,{month:"numeric",day:"numeric"})+'</div>';
@@ -398,6 +435,7 @@ function renderDayStrip(){
 function selectDay(i){
   curDay=i;
   renderDayStrip();
+  renderHeader();
   renderNow();
   renderSchedule();
   renderWeather();
@@ -405,74 +443,79 @@ function selectDay(i){
 }
 
 /* ---------- now card ---------- */
-function placeSuffix(item){
-  var p = item.place && placeById[item.place];
-  return p ? " · "+p.name : "";
-}
+function placeSuffix(item){ var p=item.place && placeById[item.place]; return p ? " · "+p.name : ""; }
 function renderNow(){
-  var wrap = document.getElementById("nowWrap");
-  var day = EV.days[curDay];
-  var now = new Date();
+  var wrap=document.getElementById("nowWrap");
+  var day=EV.days[curDay], tz=dayTz(day), now=new Date();
 
-  if(!isToday(day.date)){
-    var when = fmtDay(day.date,{weekday:"long",month:"long",day:"numeric"});
-    var first = day.schedule[0];
-    var future = dateAt(day.date,"23:59").getTime() > now.getTime();
-    var body = first ? ((future?"Starts ":"Started ")+fmt12(first.start)+" · "+esc(first.title)) : "";
+  if(!isTodayD(day)){
+    var when=fmtDay(day.date,{weekday:"long",month:"long",day:"numeric"});
+    var first=day.schedule[0];
+    var future=zonedEpoch(day.date,"23:59",tz) > now.getTime();
+    var body=first ? ((future?"Starts ":"Started ")+fmt12(first.start)+" · "+esc(first.title)) : "";
     wrap.innerHTML='<div class="card now"><div class="label">'+(future?"Coming up":"Past day")+'</div>'+
       '<div class="title">'+esc(day.title || when)+'</div>'+
       '<div class="when">'+when+(body?". "+body:"")+'</div></div>';
     return;
   }
 
-  var cur=null, nxt=null;
+  var cur=null, nxt=null, curIdx=-1, nxtIdx=-1;
   for(var i=0;i<day.schedule.length;i++){
-    var st=statusOf(day.schedule[i], day.date, now);
-    if(st==="now" && !cur){ cur=day.schedule[i]; }
-    if(st==="future" && !nxt){ nxt=day.schedule[i]; }
+    var st=statusOf(day.schedule[i], day, now);
+    if(st==="now" && !cur){ cur=day.schedule[i]; curIdx=i; }
+    if(st==="future" && !nxt){ nxt=day.schedule[i]; nxtIdx=i; }
   }
   var html='<div class="card now">';
   if(cur){
     html+='<div class="label">Right now</div><div class="title">'+esc(cur.title)+'</div>';
     html+='<div class="when">'+fmtRange(cur.start,cur.end)+placeSuffix(cur)+'</div>';
-    html+='<div class="next">Wraps up in <span class="countdown" data-until="'+dateAt(day.date,cur.end).getTime()+'"></span>';
+    html+='<div class="next">Wraps up in <span class="countdown" data-until="'+zonedEpoch(day.date,cur.end,tz)+'"></span>';
     if(nxt) html+='. Next: <b>'+esc(nxt.title)+'</b> at '+fmt12(nxt.start);
     html+='.</div>';
   } else if(nxt){
     html+='<div class="label">Up next</div><div class="title">'+esc(nxt.title)+'</div>';
     html+='<div class="when">'+fmtRange(nxt.start,nxt.end)+placeSuffix(nxt)+'</div>';
-    html+='<div class="next">Starts in <span class="countdown" data-until="'+dateAt(day.date,nxt.start).getTime()+'"></span>.</div>';
+    html+='<div class="next">Starts in <span class="countdown" data-until="'+zonedEpoch(day.date,nxt.start,tz)+'"></span>.</div>';
   } else {
     var first2=day.schedule[0];
-    if(first2 && now.getTime()<dateAt(day.date,first2.start).getTime()){
+    if(first2 && now.getTime()<zonedEpoch(day.date,first2.start,tz)){
       html+='<div class="label">Good morning</div><div class="title">'+esc(first2.title)+' at '+fmt12(first2.start)+'</div>'+
-            '<div class="when">Starts in <span class="countdown" data-until="'+dateAt(day.date,first2.start).getTime()+'"></span>.</div>';
+            '<div class="when">Starts in <span class="countdown" data-until="'+zonedEpoch(day.date,first2.start,tz)+'"></span>.</div>';
     } else {
       html+='<div class="label">That’s a wrap</div><div class="title">Day complete 🎉</div>'+
             '<div class="when">'+esc(day.closingNote || EV.closingNote || "Nicely done. Enjoy the rest of your day.")+'</div>';
     }
   }
 
-  // Walk-to-next: prefer the next block's place, else the current block's place.
+  // Day progress bar (are we there yet)
+  if(day.schedule.length){
+    var ds=zonedEpoch(day.date, day.schedule[0].start, tz);
+    var de=zonedEpoch(day.date, day.schedule[day.schedule.length-1].end, tz);
+    var pct = de>ds ? clamp(Math.round((now.getTime()-ds)/(de-ds)*100)) : 0;
+    var pos = curIdx>=0 ? curIdx+1 : (nxtIdx>=0 ? nxtIdx : day.schedule.length);
+    html+='<div class="prog"><i style="width:'+pct+'%"></i></div>';
+    html+='<div class="progcap"><span>Stop '+Math.min(pos,day.schedule.length)+' of '+day.schedule.length+'</span><span>'+pct+'% of the day</span></div>';
+  }
+
+  // Walk-to-next
   var tp=null, tlabel="";
   if(nxt && nxt.place && placeById[nxt.place]){ tp=placeById[nxt.place]; tlabel="Walk to next: "+tp.name; }
   else if(cur && cur.place && placeById[cur.place]){ tp=placeById[cur.place]; tlabel="Walk to "+tp.name; }
   if(tp){
-    var dist = myPos ? " ("+fmtDist(haversine(myPos.lat,myPos.lng,tp.lat,tp.lng))+")" : "";
+    var dist=myPos ? " ("+fmtDist(haversine(myPos.lat,myPos.lng,tp.lat,tp.lng))+")" : "";
     html+='<div class="actions">'+
       '<a class="btn primary" style="text-decoration:none" href="'+walkUrl(tp)+'" target="_blank" rel="noopener">🚶 '+esc(tlabel)+dist+'</a>'+
-      '<button class="btn ghost" data-goplace="'+tp.id+'">Show on map</button>'+
-    '</div>';
+      '<button class="btn ghost" data-goplace="'+tp.id+'">Show on map</button></div>';
   }
 
   html+='</div>';
   wrap.innerHTML=html;
-  var gp = wrap.querySelector("[data-goplace]");
+  var gp=wrap.querySelector("[data-goplace]");
   if(gp) gp.addEventListener("click", function(){ focusPlace(gp.getAttribute("data-goplace")); });
   tick();
 }
 
-/* Up-in-5 nudge: always tied to the REAL current day, no matter which day tab is open. */
+/* Up-in-5 nudge: tied to the REAL current day. */
 var NUDGE_MIN = 5;
 function renderNudge(){
   var el=document.getElementById("nudge");
@@ -480,23 +523,23 @@ function renderNudge(){
   if(ti<0){ el.innerHTML=""; return; }
   var day=EV.days[ti], now=new Date(), cur=null, nxt=null;
   for(var i=0;i<day.schedule.length;i++){
-    var st=statusOf(day.schedule[i], day.date, now);
+    var st=statusOf(day.schedule[i], day, now);
     if(st==="now" && !cur) cur=day.schedule[i];
     if(st==="future" && !nxt) nxt=day.schedule[i];
   }
   if(!cur || !nxt){ el.innerHTML=""; return; }
-  var minsLeft = (dateAt(day.date,cur.end).getTime()-now.getTime())/60000;
-  var tp = nxt.place && placeById[nxt.place];
+  var minsLeft=(zonedEpoch(day.date,cur.end,dayTz(day))-now.getTime())/60000;
+  var tp=nxt.place && placeById[nxt.place];
   if(minsLeft>0 && minsLeft<=NUDGE_MIN && tp){
-    var m = Math.max(1, Math.ceil(minsLeft));
-    var dist = myPos ? " · "+fmtDist(haversine(myPos.lat,myPos.lng,tp.lat,tp.lng)) : "";
+    var m=Math.max(1, Math.ceil(minsLeft));
+    var dist=myPos ? " · "+fmtDist(haversine(myPos.lat,myPos.lng,tp.lat,tp.lng)) : "";
     el.innerHTML='<div class="nudge"><span class="msg">⏰ '+m+' min left in '+esc(cur.title)+
       '. Head to '+esc(tp.name)+dist+'.</span>'+
       '<a class="btn" href="'+walkUrl(tp)+'" target="_blank" rel="noopener">🚶 Walk</a></div>';
   } else { el.innerHTML=""; }
 }
 
-/* ---------- weather (Open-Meteo, no key). Day-aware; hides if offline/out of range. ---------- */
+/* ---------- weather ---------- */
 var WX_CODE = {
   0:["Clear","☀️"], 1:["Mostly clear","🌤️"], 2:["Partly cloudy","⛅"], 3:["Overcast","☁️"],
   45:["Fog","🌫️"], 48:["Fog","🌫️"], 51:["Drizzle","🌦️"], 53:["Drizzle","🌦️"], 55:["Drizzle","🌦️"],
@@ -508,44 +551,43 @@ function renderWeather(){
   var el=document.getElementById("wxStrip");
   var day=EV.days[curDay], loc=day.location||EV.location;
   if(!loc){ el.innerHTML=""; return; }
-  var today=isToday(day.date);
+  var today=isTodayD(day);
   var url="https://api.open-meteo.com/v1/forecast?latitude="+loc.lat+"&longitude="+loc.lng+
     "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"+
     "&temperature_unit=fahrenheit&timezone=auto&start_date="+day.date+"&end_date="+day.date+
     (today?"&current=temperature_2m,weather_code":"");
   fetch(url).then(function(r){ return r.json(); }).then(function(d){
     if(!d || !d.daily || !d.daily.time || !d.daily.time.length){ el.innerHTML=""; return; }
-    var code = today && d.current ? d.current.weather_code : d.daily.weather_code[0];
-    var wx = WX_CODE[code]||["",""];
+    var code=today && d.current ? d.current.weather_code : d.daily.weather_code[0];
+    var wx=WX_CODE[code]||["",""];
     var hi=Math.round(d.daily.temperature_2m_max[0]), lo=Math.round(d.daily.temperature_2m_min[0]);
     var pop=d.daily.precipitation_probability_max[0];
-    var nowT = today && d.current ? '<span class="now-t">'+Math.round(d.current.temperature_2m)+'°F</span> ' : "";
+    var nowT=today && d.current ? '<span class="now-t">'+Math.round(d.current.temperature_2m)+'°F</span> ' : "";
     el.innerHTML='<div class="wx"><span class="big">'+wx[1]+'</span>'+
-      '<span>'+nowT+esc(wx[0])+
-      '<br><span class="rest">High '+hi+'° · Low '+lo+'° · '+(pop!=null?pop+'% rain':'')+'</span></span></div>';
+      '<span>'+nowT+esc(wx[0])+'<br><span class="rest">High '+hi+'° · Low '+lo+'° · '+(pop!=null?pop+'% rain':'')+'</span></span></div>';
   }).catch(function(){ el.innerHTML=""; });
 }
 
 /* ---------- schedule ---------- */
 function renderSchedule(){
-  var day=EV.days[curDay], now=new Date(), today=isToday(day.date);
+  var day=EV.days[curDay], now=new Date(), today=isTodayD(day);
   document.getElementById("schedHead").textContent = isMulti
     ? (day.title ? day.title : fmtDay(day.date,{weekday:"long",month:"long",day:"numeric"}))
     : "Full schedule";
-  var ol = document.getElementById("schedList");
+  var ol=document.getElementById("schedList");
   ol.innerHTML="";
   if(!day.schedule.length){ ol.innerHTML='<li class="loading">No plans set for this day.</li>'; }
   day.schedule.forEach(function(item){
     var li=document.createElement("li");
-    var st = today ? statusOf(item, day.date, now) : "";
+    var st=today ? statusOf(item, day, now) : "";
     var cls=[];
     if(st==="now") cls.push("is-now");
     else if(st==="past") cls.push("is-past");
     if(item.all) cls.push("is-all");
     li.className=cls.join(" ");
-    var sess = item.session? '<span class="sesspill">'+item.session+'</span>' : (item.all?'<span class="sesspill" style="background:#6d4bd6">ALL</span>':'');
+    var sess=item.session? '<span class="sesspill">'+item.session+'</span>' : (item.all?'<span class="sesspill" style="background:#6d4bd6">ALL</span>':'');
     var sub="";
-    var p = item.place && placeById[item.place];
+    var p=item.place && placeById[item.place];
     if(p) sub=p.name;
     if(item.also && placeById[item.also]) sub += (sub?" + ":"")+placeById[item.also].name;
     if(item.note) sub += (sub?" · ":"")+item.note;
@@ -558,7 +600,6 @@ function renderSchedule(){
   ol.querySelectorAll(".go").forEach(function(b){
     b.addEventListener("click", function(){ focusPlace(b.getAttribute("data-place")); });
   });
-  // per-day notes
   var dn=document.getElementById("dayNotes");
   if(day.notes && day.notes.length){
     dn.innerHTML='<div class="card"><h2>Notes for this day</h2><ul class="plain">'+
@@ -578,8 +619,7 @@ function renderInfo(){
   html+='<dl class="kv">';
   if(isMulti){
     html+='<dt>Dates</dt><dd>'+fmtDay(EV.days[0].date,{month:"long",day:"numeric"})+' – '+
-      fmtDay(EV.days[EV.days.length-1].date,{month:"long",day:"numeric",year:"numeric"})+
-      ' ('+EV.days.length+' days)</dd>';
+      fmtDay(EV.days[EV.days.length-1].date,{month:"long",day:"numeric",year:"numeric"})+' ('+EV.days.length+' days)</dd>';
   } else {
     html+='<dt>Date</dt><dd>'+fmtDay(EV.days[0].date,{weekday:"long",month:"long",day:"numeric",year:"numeric"})+'</dd>';
   }
@@ -589,13 +629,13 @@ function renderInfo(){
     if(EV.location.address) html+='<dt>Address</dt><dd>'+esc(EV.location.address)+'</dd>';
   }
   html+='</dl>';
-  html+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+
+  html+='<div class="actrow">'+
     '<a class="btn primary" style="text-decoration:none" href="'+searchUrl(center)+'" target="_blank" rel="noopener">Open in Maps</a>'+
+    '<button class="btn ghost" id="calBtn">📅 Add to calendar</button>'+
     '<button class="btn ghost" id="shareBtn">🔗 Share</button></div>';
   if(EV.team && EV.team.note) html+='<p class="small muted" style="margin:10px 0 0">'+esc(EV.team.note)+'</p>';
   html+='</div>';
 
-  // Lodging (great for trips)
   var lodging=EV.places.filter(function(p){ return p.kind==="lodging"; });
   if(lodging.length){
     html+='<div class="card"><h2>Where you’re staying</h2>';
@@ -628,14 +668,18 @@ function renderInfo(){
       '<div class="small muted" id="notifStat" style="margin-top:8px"></div></div>';
   }
 
-  html+='<div class="card"><h2>About this app</h2>'+
-    '<p class="small muted" style="margin:0">This is a <b>Daykit</b>: a pocket app for one day or a whole trip, built from photos of a paper schedule, map, or itinerary. '+
+  html+='<div class="card"><h2>Appearance</h2>'+
+    '<p class="small muted" style="margin:0 0 10px">Auto follows your phone. Tap to cycle.</p>'+
+    '<button class="btn ghost" id="themeBtn">🌗 Auto</button></div>';
+
+  html+='<div class="card"><h2>About</h2>'+
+    '<p class="small muted" style="margin:0"><b>Are We There Yet?</b> is a pocket app for one day or a whole trip, built from photos of a paper schedule, map, or itinerary. '+
     'Install it to your home screen and it runs offline. To make one for another day or trip, swap in a new <code>event.json</code>.</p></div>';
 
   w.innerHTML=html;
 
   var key="daykit:"+EV.id+":bring", saved={};
-  try { saved = JSON.parse(localStorage.getItem(key)||"{}"); } catch(e){}
+  try { saved=JSON.parse(localStorage.getItem(key)||"{}"); } catch(e){}
   w.querySelectorAll("#bringList input").forEach(function(cb){
     if(saved[cb.id]){ cb.checked=true; cb.closest("li").classList.add("done"); }
     cb.addEventListener("change", function(){
@@ -646,17 +690,21 @@ function renderInfo(){
   });
 
   var sb=w.querySelector("#shareBtn"); if(sb) sb.addEventListener("click", shareThis);
+  var cb2=w.querySelector("#calBtn"); if(cb2) cb2.addEventListener("click", downloadICS);
   var nb=w.querySelector("#notifBtn"); if(nb) nb.addEventListener("click", toggleNotify);
+  var tb=w.querySelector("#themeBtn"); if(tb) tb.addEventListener("click", cycleTheme);
   updateNotifBtn();
+  updateThemeBtn();
 }
 
 /* ---------- map ---------- */
 function mkPin(place){
-  var color = KIND_COLOR[place.kind] || KIND_COLOR.activity;
-  var glyph = ICONS[place.icon] || ICONS.pin;
+  var color=KIND_COLOR[place.kind] || KIND_COLOR.activity;
+  var glyph=ICONS[place.icon] || ICONS.pin;
+  var ring=getNote(place.id) ? " hasnote" : "";
   return L.divIcon({
     className:"", iconSize:[30,30], iconAnchor:[15,29], popupAnchor:[0,-28],
-    html:'<div class="pin" style="background:'+color+'"><span>'+glyph+'</span></div>'
+    html:'<div class="pin'+ring+'" style="background:'+color+'"><span>'+glyph+'</span></div>'
   });
 }
 function placesForDay(idx){
@@ -666,9 +714,16 @@ function placesForDay(idx){
   return EV.places.filter(function(p){
     if(refs[p.id]) return true;
     if(p.days && p.days.length) return p.days.indexOf(day.date)!==-1;
-    if(p.kind==="service"||p.kind==="lodging") return true;  // ambient, show every day
+    if(p.kind==="service"||p.kind==="lodging") return true;
     return false;
   });
+}
+function popupHtml(p){
+  var note=getNote(p.id);
+  return "<b>"+esc(p.name)+"</b>"+(p.desc?"<br>"+esc(p.desc):"")+
+    (note?'<br><span style="color:var(--muted)">📝 '+esc(note)+'</span>':'')+
+    '<br><a href="'+walkUrl(p)+'" target="_blank" rel="noopener">🚶 Walk here</a>'+
+    ' · <a href="#" onclick="editNote(\''+p.id+'\');return false;">'+(note?'Edit note':'Add note')+'</a>';
 }
 function refreshMarkers(){
   if(!map) return;
@@ -676,8 +731,7 @@ function refreshMarkers(){
   markers={};
   placesForDay(curDay).forEach(function(p){
     var m=L.marker([p.lat,p.lng],{icon:mkPin(p)}).addTo(map);
-    m.bindPopup("<b>"+esc(p.name)+"</b>"+(p.desc?"<br>"+esc(p.desc):"")+
-      '<br><a href="'+walkUrl(p)+'" target="_blank" rel="noopener">🚶 Walk here</a>');
+    m.bindPopup(popupHtml(p));
     markers[p.id]=m;
   });
   renderLegend(placesForDay(curDay));
@@ -685,11 +739,8 @@ function refreshMarkers(){
 function fitDay(){
   if(!map) return;
   var list=placesForDay(curDay);
-  if(list.length>1){
-    map.fitBounds(L.latLngBounds(list.map(function(p){ return [p.lat,p.lng]; })).pad(0.25));
-  } else {
-    var c=currentCenter(); map.setView([c.lat,c.lng], c.zoom||16);
-  }
+  if(list.length>1){ map.fitBounds(L.latLngBounds(list.map(function(p){ return [p.lat,p.lng]; })).pad(0.25)); }
+  else { var c=currentCenter(); map.setView([c.lat,c.lng], c.zoom||16); }
 }
 function initMap(){
   if(map) return;
@@ -702,12 +753,50 @@ function initMap(){
   }
   var c=currentCenter();
   map = L.map("map", { zoomControl:true }).setView([c.lat, c.lng], c.zoom||16);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom:19, attribution:"&copy; OpenStreetMap"
-  }).addTo(map);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:19, attribution:"&copy; OpenStreetMap" }).addTo(map);
   refreshMarkers();
   fitDay();
   var car=getCar(); if(car) dropCarMarker(car);
+}
+
+/* ---------- notes per stop ---------- */
+function noteKey(){ return "daykit:"+EV.id+":notes"; }
+function getNotes(){ try { return JSON.parse(localStorage.getItem(noteKey())||"{}"); } catch(e){ return {}; } }
+function getNote(id){ return getNotes()[id]||""; }
+function editNote(id){
+  var name=placeById[id] ? placeById[id].name : "this stop";
+  var v=window.prompt("Note for "+name+":", getNote(id));
+  if(v===null) return;
+  var n=getNotes(); v=v.trim();
+  if(v) n[id]=v; else delete n[id];
+  try { localStorage.setItem(noteKey(), JSON.stringify(n)); } catch(e){}
+  if(map && markers[id]){ markers[id].setIcon(mkPin(placeById[id])); markers[id].setPopupContent(popupHtml(placeById[id])); markers[id].openPopup(); }
+}
+
+/* ---------- offline map tiles ---------- */
+function tileUrls(bounds, z){
+  var n=Math.pow(2,z);
+  function lon2x(lon){ return Math.floor((lon+180)/360*n); }
+  function lat2y(lat){ var r=lat*Math.PI/180; return Math.floor((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*n); }
+  var x0=lon2x(bounds.getWest()), x1=lon2x(bounds.getEast());
+  var y0=lat2y(bounds.getNorth()), y1=lat2y(bounds.getSouth());
+  var out=[];
+  for(var x=x0;x<=x1;x++){ for(var y=y0;y<=y1;y++){ out.push("https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png"); } }
+  return out;
+}
+function saveTiles(){
+  var stat=document.getElementById("locStat");
+  initMap(); if(!map) return;
+  if(!("caches" in window)){ stat.textContent="Offline saving is not supported on this browser."; return; }
+  var b=map.getBounds(), z=map.getZoom();
+  var urls=tileUrls(b, z).concat(tileUrls(b, Math.min(19, z+1))).slice(0, 240);
+  stat.textContent="Saving "+urls.length+" map tiles for offline...";
+  caches.open("daykit-tiles").then(function(c){
+    return Promise.allSettled(urls.map(function(u){ return c.add(new Request(u, {mode:"no-cors"})); }));
+  }).then(function(res){
+    var ok=res.filter(function(r){ return r.status==="fulfilled"; }).length;
+    stat.textContent="Saved "+ok+" tiles. This area of the map now works offline.";
+  }).catch(function(){ stat.textContent="Could not save tiles. Check your connection and try again."; });
 }
 
 /* ---------- car finder ---------- */
@@ -734,7 +823,7 @@ function markCar(){
   { enableHighAccuracy:true, timeout:15000 });
 }
 function renderLegend(list){
-  list = list || EV.places;
+  list=list || EV.places;
   var used={};
   list.forEach(function(p){ used[p.kind]=true; });
   var el=document.getElementById("legend"); el.innerHTML="";
@@ -751,7 +840,6 @@ function focusPlace(id){
   showTab("map");
   setTimeout(function(){
     initMap(); if(!map) return; map.invalidateSize();
-    // if the pin is not on the current day, flip to showing all so it appears
     if(!markers[id]){ showAllPins=true; syncAllPinsBtn(); refreshMarkers(); }
     var p=placeById[id]; if(!p) return;
     map.setView([p.lat,p.lng], Math.max(map.getZoom(),17), {animate:true});
@@ -765,18 +853,18 @@ function startFindMe(){
   initMap();
   if(!map) return;
   if(watchId!==null) navigator.geolocation.clearWatch(watchId);
-  watchId = navigator.geolocation.watchPosition(function(pos){
+  watchId=navigator.geolocation.watchPosition(function(pos){
     var la=pos.coords.latitude, ln=pos.coords.longitude;
-    myPos = { lat: la, lng: ln };
+    myPos={ lat:la, lng:ln };
     renderNow(); renderNudge();
     if(!meMarker){
-      meMarker = L.marker([la,ln], {icon:L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
+      meMarker=L.marker([la,ln], {icon:L.divIcon({className:"",iconSize:[22,22],iconAnchor:[11,11],
         html:'<div class="pin me"><span></span></div>'})}).addTo(map);
       map.setView([la,ln], 17);
     } else { meMarker.setLatLng([la,ln]); }
     var pool=placesForDay(curDay), best=null, bd=1e12;
     (pool.length?pool:EV.places).forEach(function(p){ var d=haversine(la,ln,p.lat,p.lng); if(d<bd){bd=d;best=p;} });
-    stat.innerHTML = "You are here (±"+Math.round(pos.coords.accuracy)+"m)."+
+    stat.innerHTML="You are here (±"+Math.round(pos.coords.accuracy)+"m)."+
       (best? " Nearest: <b>"+esc(best.name)+"</b>, "+fmtDist(bd)+" away." : "");
   }, function(err){
     stat.textContent = err.code===1 ? "Location permission denied. Enable it in your browser settings." : "Could not get a fix. Try again outside.";
@@ -806,17 +894,15 @@ function showTab(name){
 var lastRederive = 0;
 function tick(){
   document.querySelectorAll(".countdown[data-until]").forEach(function(el){
-    el.textContent = fmtCountdown(+el.getAttribute("data-until") - Date.now());
+    el.textContent=fmtCountdown(+el.getAttribute("data-until") - Date.now());
   });
 }
 function startClock(){
   if(tickTimer) clearInterval(tickTimer);
   tick();
-  tickTimer = setInterval(function(){
+  tickTimer=setInterval(function(){
     tick();
-    // Day chips do not change minute to minute, so they stay out of this loop
-    // (re-rendering them here would scroll the strip back under the user's finger).
-    if(Date.now() - lastRederive >= 20000){ lastRederive = Date.now(); renderNow(); renderSchedule(); renderNudge(); }
+    if(Date.now()-lastRederive >= 20000){ lastRederive=Date.now(); renderNow(); renderSchedule(); renderNudge(); }
   }, 1000);
 }
 
@@ -824,7 +910,7 @@ function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&
 
 /* ---------- share ---------- */
 function shareThis(){
-  var url = location.href.split("#")[0];
+  var url=location.href.split("#")[0];
   if(navigator.share){ navigator.share({ title:EV.title, text:EV.title, url:url }).catch(function(){}); return; }
   var btn=document.getElementById("shareBtn");
   function flash(msg){ if(!btn) return; var o=btn.textContent; btn.textContent=msg; setTimeout(function(){ btn.textContent=o; },1600); }
@@ -833,9 +919,42 @@ function shareThis(){
   } else { flash(url); }
 }
 
+/* ---------- add to calendar (.ics) ---------- */
+function icsStamp(ms){
+  var d=new Date(ms);
+  return d.getUTCFullYear()+pad2(d.getUTCMonth()+1)+pad2(d.getUTCDate())+"T"+pad2(d.getUTCHours())+pad2(d.getUTCMinutes())+pad2(d.getUTCSeconds())+"Z";
+}
+function icsEsc(s){ return String(s).replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n"); }
+function buildICS(){
+  var out=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//AreWeThereYet//Daykit//EN","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+  var stamp=icsStamp(Date.now());
+  EV.days.forEach(function(day){
+    var tz=dayTz(day);
+    day.schedule.forEach(function(it,i){
+      var s=zonedEpoch(day.date,it.start,tz), e=zonedEpoch(day.date,it.end,tz);
+      out.push("BEGIN:VEVENT","UID:"+EV.id+"-"+day.date+"-"+i+"@arewethereyet","DTSTAMP:"+stamp,
+        "DTSTART:"+icsStamp(s),"DTEND:"+icsStamp(e),"SUMMARY:"+icsEsc(it.title));
+      var p=it.place && placeById[it.place];
+      if(p){ out.push("LOCATION:"+icsEsc(p.name)); if(p.lat!=null) out.push("GEO:"+p.lat+";"+p.lng); }
+      out.push("END:VEVENT");
+    });
+  });
+  out.push("END:VCALENDAR");
+  return out.join("\r\n");
+}
+function downloadICS(){
+  try {
+    var blob=new Blob([buildICS()], { type:"text/calendar;charset=utf-8" });
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a"); a.href=url; a.download=(EV.id||"itinerary")+".ics";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  } catch(e){ /* older browsers */ }
+}
+
 /* ---------- reminders (best-effort local notifications) ---------- */
 var notifTimers=[];
-var NOTIF_LEAD=10; // minutes before an activity starts
+var NOTIF_LEAD=10;
 function notifKey(){ return "daykit:"+EV.id+":notify"; }
 function notifEnabled(){
   try { return localStorage.getItem(notifKey())==="1" && ("Notification" in window) && Notification.permission==="granted"; }
@@ -843,10 +962,9 @@ function notifEnabled(){
 }
 function setNotifPref(on){ try { localStorage.setItem(notifKey(), on?"1":"0"); } catch(e){} }
 function showNotif(title, body){
-  var opts={ body:body, icon:"assets/icon-192.png", badge:"assets/icon-192.png", tag:"daykit-next", renotify:true };
+  var opts={ body:body, icon:"assets/icon-192.png", badge:"assets/icon-192.png", tag:"awty-next", renotify:true };
   if(navigator.serviceWorker && navigator.serviceWorker.ready){
-    navigator.serviceWorker.ready.then(function(reg){ reg.showNotification(title, opts); })
-      .catch(function(){ try{ new Notification(title, opts); }catch(e){} });
+    navigator.serviceWorker.ready.then(function(reg){ reg.showNotification(title, opts); }).catch(function(){ try{ new Notification(title, opts); }catch(e){} });
   } else { try{ new Notification(title, opts); }catch(e){} }
 }
 function clearNotifTimers(){ notifTimers.forEach(clearTimeout); notifTimers=[]; }
@@ -854,13 +972,13 @@ function scheduleNotifs(){
   clearNotifTimers();
   if(!notifEnabled()) return;
   var ti=todayIndex(); if(ti<0) return;
-  var day=EV.days[ti], now=Date.now();
+  var day=EV.days[ti], tz=dayTz(day), now=Date.now();
   day.schedule.forEach(function(it){
-    var start=dateAt(day.date, it.start).getTime();
-    if(start<=now) return;                        // already started
+    var start=zonedEpoch(day.date, it.start, tz);
+    if(start<=now) return;
     var delay=(start - NOTIF_LEAD*60000) - now;
-    if(delay<0) delay=0;                          // starts within the lead window: remind now
-    if(delay>86400000) return;                    // safety cap (setTimeout range)
+    if(delay<0) delay=0;
+    if(delay>86400000) return;
     var p=it.place && placeById[it.place];
     notifTimers.push(setTimeout(function(){
       showNotif("Up next: "+it.title, "Starts at "+fmt12(it.start)+(p?" · "+p.name:""));
@@ -872,7 +990,7 @@ function updateNotifBtn(){
   if(!btn) return;
   var on=notifEnabled();
   btn.className="btn "+(on?"primary":"ghost");
-  btn.textContent = on ? "🔔 Reminders on (tap to turn off)" : "🔔 Turn on reminders";
+  btn.textContent=on ? "🔔 Reminders on (tap to turn off)" : "🔔 Turn on reminders";
   if(stat){
     if(!("Notification" in window)) stat.textContent="This browser does not support reminders.";
     else if(Notification.permission==="denied") stat.textContent="Notifications are blocked. Enable them in your browser settings.";
@@ -889,10 +1007,51 @@ function toggleNotify(){
   }).catch(function(){ updateNotifBtn(); });
 }
 
-/* ---------- auto-focus the current/next block on the event day ---------- */
+/* ---------- appearance (light/dark) ---------- */
+function storedTheme(){ try { return localStorage.getItem("daykit:theme"); } catch(e){ return null; } }
+function resolvedDark(){
+  var t=storedTheme();
+  if(t==="dark") return true;
+  if(t==="light") return false;
+  return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
+function applyTheme(){
+  var r=document.documentElement.style, t=(EV && EV.theme) ? EV.theme : {};
+  var dark=resolvedDark();
+  if(t.primary) r.setProperty("--primary", t.primary);
+  if(t.accent){ r.setProperty("--accent", t.accent); KIND_COLOR.activity=t.accent; }
+  if(t.sun) r.setProperty("--sun", t.sun);
+  if(t.water){ r.setProperty("--water", t.water); KIND_COLOR.water=t.water; }
+  ["--ink","--bg","--card"].forEach(function(v){ r.removeProperty(v); });   // let dark CSS win when dark
+  if(!dark){
+    if(t.ink) r.setProperty("--ink", t.ink);
+    if(t.bg) r.setProperty("--bg", t.bg);
+    if(t.card) r.setProperty("--card", t.card);
+  }
+  var tc=document.querySelector('meta[name="theme-color"]');
+  if(tc) tc.setAttribute("content", (t.primary) || (dark?"#10141b":"#2f80c4"));
+}
+function applyThemeMode(){
+  var t=storedTheme();
+  if(t) document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+  applyTheme();
+}
+function cycleTheme(){
+  var order=[null,"light","dark"], cur=storedTheme(), next=order[(order.indexOf(cur)+1)%order.length];
+  try { if(next) localStorage.setItem("daykit:theme", next); else localStorage.removeItem("daykit:theme"); } catch(e){}
+  applyThemeMode(); updateThemeBtn();
+}
+function updateThemeBtn(){
+  var b=document.getElementById("themeBtn"); if(!b) return;
+  var t=storedTheme();
+  b.textContent = t==="dark" ? "🌙 Dark" : t==="light" ? "☀️ Light" : "🌗 Auto";
+}
+
+/* ---------- auto-focus current/next block ---------- */
 function scrollToNow(){
   var day=EV.days[curDay];
-  if(!isToday(day.date)) return;
+  if(!isTodayD(day)) return;
   if(!document.getElementById("tab-schedule").classList.contains("active")) return;
   var el=document.querySelector("#schedList li.is-now") || document.querySelector("#schedList li:not(.is-past)");
   if(el){ try{ el.scrollIntoView({block:"center", behavior:"smooth"}); }catch(e){ el.scrollIntoView(); } }
@@ -901,45 +1060,30 @@ function scrollToNow(){
 /* ---------- boot ---------- */
 function normalizeDays(data){
   if(Array.isArray(data.days) && data.days.length){
-    return data.days.map(function(d,i){ return {
-      date:d.date, title:d.title||"", location:d.location||data.location,
+    return data.days.map(function(d){ return {
+      date:d.date, title:d.title||"", location:d.location||data.location, timezone:d.timezone||data.timezone,
       schedule:d.schedule||[], notes:d.notes||[], closingNote:d.closingNote
     };});
   }
-  return [{ date:data.date, title:data.title, location:data.location,
+  return [{ date:data.date, title:data.title, location:data.location, timezone:data.timezone,
             schedule:data.schedule||[], notes:data.notes||[], closingNote:data.closingNote }];
-}
-function applyTheme(){
-  if(!EV.theme) return;
-  var r=document.documentElement.style, t=EV.theme;
-  if(t.primary) r.setProperty("--primary", t.primary);
-  if(t.accent)  r.setProperty("--accent", t.accent);
-  if(t.sun)     r.setProperty("--sun", t.sun);
-  if(t.water)   r.setProperty("--water", t.water);
-  if(t.ink)     r.setProperty("--ink", t.ink);
-  if(t.bg)      r.setProperty("--bg", t.bg);
-  if(t.card)    r.setProperty("--card", t.card);
-  if(t.water)   KIND_COLOR.water = t.water;
-  if(t.accent)  KIND_COLOR.activity = t.accent;
-  var tc=document.querySelector('meta[name="theme-color"]');
-  if(tc && t.primary) tc.setAttribute("content", t.primary);
 }
 function syncAllPinsBtn(){
   var btn=document.getElementById("allPinsBtn");
-  btn.hidden = !isMulti;
-  btn.textContent = showAllPins ? "This day only" : "Show all stops";
+  btn.hidden=!isMulti;
+  btn.textContent=showAllPins ? "This day only" : "Show all stops";
 }
 function boot(){
   fetch("event.json", {cache:"no-cache"}).then(function(r){ return r.json(); }).then(function(data){
-    EV = data;
-    EV.places = EV.places || [];
-    EV.days = normalizeDays(data);
-    isMulti = EV.days.length > 1;
-    placeById = {};
+    EV=data;
+    EV.places=EV.places||[];
+    EV.days=normalizeDays(data);
+    isMulti=EV.days.length>1;
+    placeById={};
     EV.places.forEach(function(p){ placeById[p.id]=p; });
-    var ti = todayIndex();
-    curDay = ti>=0 ? ti : 0;
-    applyTheme();
+    var ti=todayIndex();
+    curDay=ti>=0 ? ti : 0;
+    applyThemeMode();
     renderHeader();
     renderDayStrip();
     renderNow();
@@ -948,7 +1092,7 @@ function boot(){
     renderInfo();
     renderWeather();
     syncAllPinsBtn();
-    document.getElementById("foot").textContent = "Daykit · map data © OpenStreetMap · offline-ready";
+    document.getElementById("foot").textContent="Are We There Yet? · map data © OpenStreetMap · offline-ready";
     startClock();
     if(notifEnabled()) scheduleNotifs();
     var h=(location.hash||"").replace("#","");
@@ -967,13 +1111,17 @@ document.querySelectorAll("nav.tabs button").forEach(function(b){
 });
 document.getElementById("findMe").addEventListener("click", startFindMe);
 document.getElementById("parkBtn").addEventListener("click", markCar);
+document.getElementById("saveTilesBtn").addEventListener("click", saveTiles);
 document.getElementById("allPinsBtn").addEventListener("click", function(){
   showAllPins=!showAllPins; syncAllPinsBtn();
   initMap(); if(map){ refreshMarkers(); fitDay(); }
 });
-document.getElementById("recenter").addEventListener("click", function(){
-  initMap(); if(map) fitDay();
-});
+document.getElementById("recenter").addEventListener("click", function(){ initMap(); if(map) fitDay(); });
+
+/* react to system light/dark changes when on Auto */
+if(window.matchMedia){
+  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){ if(!storedTheme()) applyTheme(); }); } catch(e){}
+}
 
 /* PWA install */
 var deferredPrompt=null;
@@ -984,9 +1132,7 @@ window.addEventListener("beforeinstallprompt", function(e){
 document.getElementById("installBtn").addEventListener("click", function(){
   if(!deferredPrompt) return;
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.finally(function(){
-    deferredPrompt=null; document.getElementById("installBar").classList.remove("show");
-  });
+  deferredPrompt.userChoice.finally(function(){ deferredPrompt=null; document.getElementById("installBar").classList.remove("show"); });
 });
 document.getElementById("installX").addEventListener("click", function(){
   document.getElementById("installBar").classList.remove("show");

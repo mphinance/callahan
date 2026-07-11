@@ -1,9 +1,10 @@
-/* Daykit service worker.
+/* Are We There Yet? service worker.
    Lives at the repo root so its scope covers the whole app on GitHub Pages.
    Caches the app shell plus event.json so the whole day still loads with no signal.
-   Live GPS and map tiles still need a network, they just degrade gracefully. */
+   Map tiles saved via "Save offline" live in a separate cache (TILES) that survives updates. */
 
-var CACHE = 'daykit-v5';
+var CACHE = 'daykit-v6';
+var TILES = 'daykit-tiles';   // written by the app's "Save offline" button; kept across activations
 
 // Same-origin shell (relative to scope). These must all fetch for install to succeed.
 var CORE = [
@@ -34,7 +35,7 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil((async function () {
     var keys = await caches.keys();
-    await Promise.all(keys.map(function (k) { return k === CACHE ? null : caches.delete(k); }));
+    await Promise.all(keys.map(function (k) { return (k === CACHE || k === TILES) ? null : caches.delete(k); }));
     await self.clients.claim();
   })());
 });

@@ -1,4 +1,4 @@
-# Daykit: the `event.json` schema
+# Are We There Yet?: the `event.json` schema
 
 The app (`index.html`) is generic. Everything specific to a day or trip lives
 in `event.json`. This is the full field reference. Times are 24-hour
@@ -15,7 +15,10 @@ same internal shape, so single-day files never need a `days` array.
   "id": "door-county-getaway",         // slug, used as a localStorage namespace
   "title": "Door County Getaway",
   "subtitle": "3-day Wisconsin coast trip",  // optional, header eyebrow
-  "timezone": "America/Chicago",       // informational; times render in the device's local zone
+  "timezone": "America/Chicago",       // IANA zone. Schedule times are wall-clock IN this zone,
+                                       // so countdowns and reminders are correct even on a phone
+                                       // set to another timezone. Omit to use the device's zone.
+                                       // Can also be set per-day inside a days[] entry.
 
   "theme": { "primary": "#1d9bd1", "accent": "#0e7ea6", "sun": "#4fc3e8",
              "water": "#0e7ea6", "ink": "#0b2733", "bg": "#f0f9fc", "card": "#ffffff" },

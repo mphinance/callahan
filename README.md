@@ -1,21 +1,21 @@
-# Daykit
+# Are We There Yet?
 
 A drop-in pocket app for a single day or a whole trip. Point Claude at
 photos of a paper schedule, an event map, or a printed itinerary, and it
 fills in one `event.json`. The app renders that into an installable PWA with
-a live schedule, a map, find-me GPS, and an offline itinerary. It runs fully
-offline once installed, so it works in a field or a national park with no
-signal.
+a live schedule, an arrival countdown and progress bar, a map with find-me
+GPS, and an offline itinerary. It runs fully offline once installed, so it
+works in a field or a national park with no signal.
 
-This started as a fork of Operation Callahan (a one-off Cedar Point trip app)
-and was generalized so anything from a one-day camp to a week-long vacation
-can be dropped in.
+This began as a fork of Operation Callahan (a one-off Cedar Point trip app)
+and grew into a reusable thing for any day-to-week outing. The name is the
+question every kid asks from the back seat.
 
 ## The idea
 
 The app code never changes. A single `event.json` describes the whole thing:
-title, dates, location with GPS, the schedule (one day or many), and every
-place on the map. Swap that one file and you have a different event.
+title, dates, timezone, location with GPS, the schedule (one day or many),
+and every place on the map. Swap that one file and you have a different event.
 
 The hard part, turning a photographed schedule, map, or itinerary into clean
 structured data with real GPS coordinates, is done by Claude (or any capable
@@ -28,38 +28,40 @@ AI). See [NEW-EVENT.md](NEW-EVENT.md) for the exact workflow and prompt.
 ## One day or many
 
 - **Single day** (a camp, a conference, a wedding): one date, one schedule.
-  This is the bundled `event.json`, the Bear (Popsicle Pirates) track at PAC
-  Summer Blast Adventure WEST, St. John's Northwestern Academy, Delafield WI.
+  The bundled `event.json` is the Bear (Popsicle Pirates) track at PAC Summer
+  Blast Adventure WEST, St. John's Northwestern Academy, Delafield WI.
 - **Multi-day** (a vacation, a road trip, a festival weekend): a `days[]`
-  array, each with its own date, schedule, and places. A day switcher appears
-  at the top, the header shows "Day 2 of 5" or a countdown to the trip, and
-  the map filters to the selected day's stops. See
+  array, each with its own date, schedule, and places. A day switcher appears,
+  the header shows "Day 2 of 5" or a countdown to the trip, and the map
+  filters to the selected day. See
   [`samples/vacation.json`](samples/vacation.json) for a 3-day Door County
   example.
 
-Single-day files need no `days[]` at all. The app treats a flat top-level
-`schedule` as a one-day trip, so old files keep working.
+Single-day files need no `days[]`. A flat top-level `schedule` is treated as
+a one-day trip, so old files keep working.
 
 ## What the app does
 
 Three tabs, no backend, no build step.
 
-- **Schedule** - A live "right now / up next" banner with a countdown to the
-  next thing, plus the day as a timeline. On the event day it opens focused on
-  the current block, highlights it, and dims finished ones. A pulsing "up in 5
-  minutes" nudge tells you when to start walking, and optional reminders can
-  notify you before each activity even with the app in your pocket. Every
-  block links to its spot on the map, with one-tap walking directions to your
-  next stop. On trips, a day switcher scrolls across the top.
-- **Map** - A Leaflet map with a colored pin for every stop (activities,
-  food, lodging, services). "Find me" drops your live GPS and names the
-  nearest stop. "Mark my car" saves where you parked. On trips, the map shows
-  the selected day's stops with a "Show all" toggle.
-- **Info** - Location and Open-in-Maps, a Share button to send the installable
-  link to family, where you're staying, a packing checklist that saves to the
-  phone, live weather, reminder controls, and good-to-know notes.
+- **Schedule** - A live "right now / up next" banner with a countdown, a
+  "how much of the day is done" progress bar, and the day as a timeline. On
+  the event day it opens focused on the current block, highlights it, and dims
+  finished ones. A pulsing "up in 5 minutes" nudge tells you when to move, and
+  optional reminders can notify you before each activity. Every block links to
+  its spot on the map with one-tap walking directions. On trips, a day
+  switcher scrolls across the top.
+- **Map** - A Leaflet map with a colored pin for every stop (activities, food,
+  lodging, sights, services). "Find me" drops your live GPS and names the
+  nearest stop, "Mark my car" saves where you parked, "Save offline" caches
+  the visible tiles so the map keeps working with no signal, and tapping any
+  pin lets you jot a note.
+- **Info** - Location and Open-in-Maps, an Add-to-Calendar export (.ics), a
+  Share button, where you're staying, a saved packing checklist, live weather,
+  reminder controls, a light/dark appearance toggle, and good-to-know notes.
 
-The whole thing installs to the home screen and works offline.
+Times respect the event's `timezone`, so a trip in another zone still shows
+the right clock. The whole thing installs to the home screen and works offline.
 
 ## Run it locally
 
@@ -72,15 +74,14 @@ python -m http.server 8000
 ```
 
 Then open `http://localhost:8000`. Geolocation works on `localhost` and on
-HTTPS (like GitHub Pages), but browsers block it on plain `file://` URLs, so
-serve it rather than double-clicking the file if you want GPS.
+HTTPS (like GitHub Pages), but browsers block it on plain `file://` URLs.
 
-To preview the multi-day sample, copy it over the live file first:
-`cp samples/vacation.json event.json` (then restore with git when done).
+To preview the multi-day sample: `cp samples/vacation.json event.json` (then
+restore with git when done).
 
 ## Deploy to GitHub Pages
 
-Pages is HTTPS, so GPS and installability both work with no backend.
+Pages is HTTPS, so GPS, reminders, and installability all work with no backend.
 
 1. Push to `main`.
 2. In the repo, go to **Settings > Pages > Build and deployment**.
@@ -88,7 +89,15 @@ Pages is HTTPS, so GPS and installability both work with no backend.
    and **Save**.
 4. Wait about a minute. The live URL is `https://<user>.github.io/<repo>/`.
 
-The `.nojekyll` file disables Jekyll so the `assets/` folder serves. Keep it.
+The `.nojekyll` file disables Jekyll so `assets/` serves. Keep it.
+
+## A note on reminders
+
+Reminders are best-effort local notifications: they fire while the installed
+app is running or recently backgrounded, with no server involved. Always-on
+push (delivered hours later with the app fully closed) would need a small
+backend with the Web Push protocol, which this static app intentionally does
+not include.
 
 ## Make it your own day or trip
 
@@ -96,18 +105,17 @@ The `.nojekyll` file disables Jekyll so the `assets/` folder serves. Keep it.
 2. Photograph the schedule, map, or itinerary.
 3. Hand the photos to Claude with the prompt in that file. You get a fresh
    `event.json` (single-day or multi-day).
-4. Drop it in, bump `CACHE` in `sw.js`, update `name` in `manifest.json`,
-   and redeploy.
+4. Drop it in, bump `CACHE` in `sw.js`, update `manifest.json`, and redeploy.
 
 ## Files
 
 | File | What it is |
 |------|------------|
-| `index.html` | The entire app: shell, three tabs, map, live clock, day switcher, PWA wiring. Data-driven, never needs editing per event. |
+| `index.html` | The entire app: shell, three tabs, map, live clock, day switcher, timezone logic, PWA wiring. Data-driven, never edited per event. |
 | `event.json` | The one file that describes a day or a trip. Swap this to change events. |
 | `samples/vacation.json` | A 3-day multi-day trip example. |
 | `manifest.json` | PWA metadata (name, icons, colors). |
-| `sw.js` | Service worker. Caches the shell and `event.json` for offline use. |
+| `sw.js` | Service worker. Caches the shell, `event.json`, and any tiles you save offline. |
 | `gen-icons.js` | Regenerates the app icons via Playwright. |
 | `NEW-EVENT.md` | How to turn photos into a new `event.json` with Claude. |
 | `SPEC.md` | The `event.json` schema, field by field. |
