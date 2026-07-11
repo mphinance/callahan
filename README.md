@@ -69,6 +69,19 @@ Three tabs, no backend, no build step.
 Times respect the event's `timezone`, so a trip in another zone still shows
 the right clock. The whole thing installs to the home screen and works offline.
 
+## Screenshots
+
+| Schedule | Kids mode |
+|:--:|:--:|
+| ![Schedule tab](docs/screenshot-schedule.png) | ![Kids tab](docs/screenshot-kids.png) |
+| **Info** | **Dark mode** |
+| ![Info tab](docs/screenshot-info.png) | ![Dark mode](docs/screenshot-dark.png) |
+
+Regenerate them anytime with `npm run shots` (or `node screenshots.js`). The
+script serves the repo, drives each tab, and writes the PNGs to `docs/`. Run
+it with a network connection and it also captures the Map tab (Leaflet and
+OpenStreetMap tiles need to load).
+
 ## Run it locally
 
 Plain static HTML. No npm needed to run it.
@@ -123,6 +136,7 @@ not include.
 | `manifest.json` | PWA metadata (name, icons, colors). |
 | `sw.js` | Service worker. Caches the shell, `event.json`, and any tiles you save offline. |
 | `gen-icons.js` | Regenerates the app icons via Playwright. |
+| `screenshots.js` | Captures the `docs/` screenshots via Playwright (`npm run shots`). |
 | `NEW-EVENT.md` | How to turn photos into a new `event.json` with Claude. |
 | `SPEC.md` | The `event.json` schema, field by field. |
 | `.nojekyll` | Lets GitHub Pages serve the `assets/` folder. |
