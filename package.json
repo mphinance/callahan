@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "icons": "node gen-icons.js",
+    "shots": "node screenshots.js"
+  },
   "dependencies": {
     "playwright": "^1.61.0"
   }
