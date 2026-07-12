@@ -63,15 +63,22 @@ Three tabs, no backend, no build step.
   they reach (with confetti), and three offline boredom-busters are built in:
   Bingo, Spot It, and I Spy.
 - **Info** - Location and Open-in-Maps, an Add-to-Calendar export (.ics), a
-  Share button, where you're staying, a saved packing checklist, trip goal
-  lists, live weather, reminder controls, a light/dark appearance toggle, and
-  good-to-know notes.
+  Share button, where you're staying, a reservations tracker, a saved packing
+  checklist, trip goal lists, live weather, reminder controls, a light/dark
+  appearance toggle, and good-to-know notes.
 - **Trip goals** - Two saved checklists on the Info tab that split the trip
   into what matters. A "must-do / the whole point" list for the reasons you
   came, and a "would-be-awesome / bonus adventures" list for the stops you'll
   hit if time allows or another adventure brings you close. Each shows a
   little "3 of 4 done" progress line, and ticks stay checked offline like the
   packing list. Both are optional and data-driven from `event.json`.
+- **Reservations and tickets** - An optional `bookings` list on the Info tab
+  for the things that have to be worked out ahead of time: tour tickets, dinner
+  seatings, ferries, permits. Each shows a status pill (confirmed, to book, or
+  waitlist), an optional book-by deadline that turns amber as it nears and red
+  when it's overdue, plus confirmation numbers, a booking link, and directions.
+  A header count keeps "3 still to book" in front of you, and checking one off
+  stays checked offline. Fully optional and data-driven.
 
 Times respect the event's `timezone`, so a trip in another zone still shows
 the right clock. The whole thing installs to the home screen and works offline.

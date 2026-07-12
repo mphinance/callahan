@@ -36,6 +36,9 @@ corner.
 > - Add a sensible `bring` checklist and a `closingNote`.
 > - Add a `lists` array with a `must` list (the whole point of the day) and a
 >   `stretch` list (bonus things to do if there is time).
+> - If anything has to be signed up, paid, or reserved ahead of time (forms,
+>   tickets, volunteer slots), add a `bookings` array with a `status` of
+>   `confirmed`, `todo`, or `waitlist` and a `by` deadline where one applies.
 >
 > Output only the `event.json`.
 
@@ -56,6 +59,10 @@ corner.
 >   `notes`.
 > - Add a `lists` array with a `must` list (the reasons for the trip) and a
 >   `stretch` list (would-be-awesome extras if time allows).
+> - Add a `bookings` array for anything that needs a reservation or ticket
+>   (hotels, tours, dinners, ferries, permits), each with a `status`
+>   (`confirmed`, `todo`, or `waitlist`) and a `by` book-by deadline where the
+>   thing sells out or has a cutoff.
 >
 > Output only the `event.json`.
 

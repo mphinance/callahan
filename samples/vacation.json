@@ -16,6 +16,13 @@
     "Cooler and reusable water bottles",
     "Sunscreen and bug spray"
   ],
+  "bookings": [
+    { "title": "Whistling Swan Inn, 3 nights", "status": "confirmed", "when": "Jul 17 to 19", "ref": "WSI-88213", "place": "inn", "who": "Everyone" },
+    { "title": "Pelletier's fish boil, dinner seating", "status": "confirmed", "when": "Fri Jul 17, 6:00pm", "ref": "Table for 4", "place": "dinnerfc", "note": "The boil-over is at 6:30. Do not be late for it." },
+    { "title": "Eagle Bluff Lighthouse tour", "status": "todo", "by": "2026-07-15", "when": "Sat Jul 18, around 12:15pm", "place": "lighthouse", "url": "https://doorcountyhistoricalsociety.org", "note": "Tours sell out in summer. Grab the noon slot before it fills." },
+    { "title": "Washington Island ferry", "status": "todo", "by": "2026-07-16", "who": "If we get the time", "url": "https://wisferry.com", "note": "Stretch goal. Check the last return time before committing the day to it." },
+    { "title": "Kayak rental at Nicolet Bay", "status": "waitlist", "when": "Sat Jul 18 afternoon", "place": "beach", "note": "Called ahead. They will hold two boats if an afternoon slot opens up." }
+  ],
   "lists": [
     {
       "tone": "must",

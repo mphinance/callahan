@@ -92,6 +92,39 @@ accent with a "Must do" pill, `stretch` in the water blue with an "If we get
 time" pill; any other tone gets neutral styling. Omit `lists` entirely and the
 section does not appear.
 
+## `bookings` (reservations and tickets)
+
+Optional. The things that have to be worked out ahead of time: tour tickets,
+dinner seatings, ferries, campsites, permits. Renders as a "Reservations and
+tickets" card on the Info tab with a "N still to book" header count. Each row
+has a checkbox you tick when it's handled; `confirmed` items start ticked, and
+your ticks persist offline per item like the packing list (under the
+`daykit:<event.id>:bookings` key).
+
+```jsonc
+"bookings": [
+  {
+    "title": "Eagle Bluff Lighthouse tour",  // required
+    "status": "todo",        // "todo" (needs booking), "confirmed" (locked in),
+                             // or "waitlist" (pending). Sets the pill color.
+                             // Anything unrecognized falls back to "todo".
+    "when": "Sat Jul 18, around 12:15pm",  // optional free-text reservation time
+    "by": "2026-07-15",      // optional book-by deadline (yyyy-mm-dd). Shows a
+                             // countdown that turns amber within 14 days and red
+                             // when overdue. Hidden once the row is handled.
+    "ref": "WSI-88213",      // optional confirmation or reference number
+    "url": "https://...",    // optional booking link (Book / View)
+    "place": "lighthouse",   // optional place id; adds a Directions link
+    "who": "Everyone",       // optional, who it's for
+    "note": "Sells out in summer."  // optional free text
+  }
+]
+```
+
+A string shorthand is accepted and treated as a `todo` with just a title:
+`"bookings": ["Book the ferry", "Reserve a campsite"]`. Omit `bookings`
+entirely and the section does not appear.
+
 ## `schedule` items
 
 ```jsonc

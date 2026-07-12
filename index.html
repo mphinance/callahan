@@ -231,6 +231,24 @@
   .goallist.stretch .goalpill { background: var(--water); }
   .goallist.stretch .check input { accent-color: var(--water); }
   .goalprog { font-size: 11px; color: var(--muted); font-weight: 700; margin: 4px 0 0; }
+  .bksum { font-size: 12px; color: var(--muted); font-weight: 700; margin: 0 0 10px; }
+  .bklist { list-style: none; margin: 0; padding: 0; }
+  .bk { display: flex; gap: 10px; align-items: flex-start; padding: 11px 2px; border-bottom: 1px solid var(--line); }
+  .bk:last-child { border-bottom: 0; }
+  .bk input { width: 20px; height: 20px; margin-top: 2px; accent-color: #2e9e5b; flex: 0 0 auto; }
+  .bk .bkmain { flex: 1 1 auto; min-width: 0; }
+  .bk .bktop { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .bk .bkname { font-size: 14px; font-weight: 700; }
+  .bk.done .bkname { text-decoration: line-through; color: var(--muted); }
+  .bkpill { font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; color: #fff; background: var(--muted); white-space: nowrap; }
+  .bkpill.confirmed { background: #2e9e5b; }
+  .bkpill.waitlist { background: #e0922f; }
+  .bkpill.todo { background: var(--accent); }
+  .bkmeta { font-size: 12px; color: var(--muted); margin: 3px 0 0; }
+  .bkmeta a { color: var(--water); font-weight: 600; }
+  .bkby { font-weight: 700; }
+  .bkby.soon { color: #c9791f; }
+  .bkby.over { color: #d64545; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; margin: 0; }
   .kv dt { color: var(--muted); }
   .kv dd { margin: 0; font-weight: 600; }
@@ -417,6 +435,37 @@ function normalizeLists(raw){
     });
   }
   return out;
+}
+
+/* Reservation statuses. "todo" needs booking, "confirmed" is locked, "waitlist" is pending. */
+var BOOK_STATUS = {
+  todo:      { pill:"To book" },
+  confirmed: { pill:"Confirmed" },
+  waitlist:  { pill:"Waitlist" }
+};
+
+/* Accept a few shapes for EV.bookings and normalize to [{title,status,...}]. */
+function normalizeBookings(raw){
+  if(!Array.isArray(raw)) return [];
+  return raw.map(function(b){
+    if(typeof b==="string") return { title:b, status:"todo", when:"", by:"", ref:"", url:"", place:"", who:"", note:"" };
+    if(!b || !b.title) return null;
+    var status=String(b.status||"todo").toLowerCase();
+    if(!BOOK_STATUS[status]) status="todo";
+    return {
+      title:b.title, status:status,
+      when:b.when||"", by:b.by||"", ref:b.ref||"", url:b.url||"",
+      place:b.place||"", who:b.who||"", note:b.note||""
+    };
+  }).filter(Boolean);
+}
+
+/* Whole days from local midnight until a yyyy-mm-dd date. Negative means past. */
+function daysUntil(ymd){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd))) return null;
+  var target=dateAt(ymd,"00:00"), now=new Date();
+  now.setHours(0,0,0,0);
+  return Math.round((target-now)/86400000);
 }
 
 /* ---- time helpers. Schedule times are wall-clock in the event's timezone. ---- */
@@ -742,6 +791,45 @@ function renderInfo(){
     html+='</div>';
   }
 
+  var bookings=normalizeBookings(EV.bookings);
+  if(bookings.length){
+    var bsaved={};
+    try { bsaved=JSON.parse(localStorage.getItem("daykit:"+EV.id+":bookings")||"{}"); } catch(e){}
+    var toBook=0, rows="";
+    bookings.forEach(function(bk,i){
+      var id="bk-"+i;
+      var handled = (id in bsaved) ? !!bsaved[id] : (bk.status==="confirmed");
+      if(!handled) toBook++;
+      var pill=(BOOK_STATUS[bk.status]||BOOK_STATUS.todo).pill;
+      var parts=[];
+      if(bk.when) parts.push(esc(bk.when));
+      if(bk.who) parts.push(esc(bk.who));
+      if(bk.ref) parts.push("Ref "+esc(bk.ref));
+      if(bk.by && !handled){
+        var du=daysUntil(bk.by), byd=fmtDay(bk.by,{month:"short",day:"numeric"});
+        var cls = du==null ? "" : (du<0 ? "over" : (du<=14 ? "soon" : ""));
+        var lab = du==null ? ("Book by "+esc(bk.by))
+                : du<0    ? ("Overdue since "+byd)
+                : du===0  ? "Book by today"
+                :           ("Book by "+byd+" ("+du+"d)");
+        parts.push('<span class="bkby '+cls+'">'+lab+'</span>');
+      }
+      if(bk.url) parts.push('<a href="'+esc(bk.url)+'" target="_blank" rel="noopener">'+(handled?"View":"Book")+'</a>');
+      var bp=bk.place && placeById[bk.place];
+      if(bp) parts.push('<a href="'+searchUrl(bp)+'" target="_blank" rel="noopener">Directions</a>');
+      rows+='<li class="bk'+(handled?" done":"")+'">'+
+        '<input type="checkbox" id="'+id+'"'+(handled?" checked":"")+'>'+
+        '<div class="bkmain"><div class="bktop"><span class="bkname">'+esc(bk.title)+'</span>'+
+          '<span class="bkpill '+bk.status+'">'+pill+'</span></div>'+
+          (parts.length?'<div class="bkmeta">'+parts.join(" · ")+'</div>':'')+
+          (bk.note?'<div class="bkmeta" style="opacity:.85">'+esc(bk.note)+'</div>':'')+
+        '</div></li>';
+    });
+    html+='<div class="card"><h2>Reservations &amp; tickets</h2>'+
+      '<p class="bksum">'+(toBook ? (toBook+" still to book") : "All booked 🎉")+'</p>'+
+      '<ul class="bklist" id="bookList">'+rows+'</ul></div>';
+  }
+
   if(EV.bring && EV.bring.length){
     html+='<div class="card"><h2>'+(isMulti?"Packing":"Bring")+' / checklist</h2><ul class="check" id="bringList">';
     EV.bring.forEach(function(b,i){
@@ -803,6 +891,26 @@ function renderInfo(){
       try { localStorage.setItem(key, JSON.stringify(saved)); } catch(e){}
     });
   });
+
+  var blist=w.querySelector("#bookList");
+  if(blist){
+    var bkey="daykit:"+EV.id+":bookings", bsaved2={};
+    try { bsaved2=JSON.parse(localStorage.getItem(bkey)||"{}"); } catch(e){}
+    var refreshBookSum=function(){
+      var sum=w.querySelector(".bksum"); if(!sum) return;
+      var n=0;
+      blist.querySelectorAll("input").forEach(function(b){ if(!b.checked) n++; });
+      sum.textContent = n ? (n+" still to book") : "All booked 🎉";
+    };
+    blist.querySelectorAll("input").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        cb.closest("li").classList.toggle("done", cb.checked);
+        bsaved2[cb.id]=cb.checked;
+        try { localStorage.setItem(bkey, JSON.stringify(bsaved2)); } catch(e){}
+        refreshBookSum();
+      });
+    });
+  }
 
   var lkey="daykit:"+EV.id+":lists", lsaved={};
   try { lsaved=JSON.parse(localStorage.getItem(lkey)||"{}"); } catch(e){}

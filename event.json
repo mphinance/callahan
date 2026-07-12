@@ -31,6 +31,11 @@
     "Closed-toe shoes for Archery and BB Guns",
     "Name tag (turn it in at the end for your patch and medal)"
   ],
+  "bookings": [
+    { "title": "Register your Scout for Summer Blast", "status": "confirmed", "ref": "PAC-2026-4471", "who": "Bear den", "note": "Paid at the June pack meeting." },
+    { "title": "Turn in the annual BSA health form (parts A and B)", "status": "todo", "by": "2026-07-10", "note": "Required before the first activity. Hand it to check-in at the Main Field." },
+    { "title": "Sign up as a den walker for the day", "status": "waitlist", "who": "One adult per den", "note": "Two spots still open. Ask the Cubmaster if you can help shepherd the column." }
+  ],
   "lists": [
     {
       "tone": "must",
