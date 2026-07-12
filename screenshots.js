@@ -39,7 +39,8 @@ const SHOTS = [
   { name: 'schedule', tab: 'schedule' },
   { name: 'kids',     tab: 'kids' },
   { name: 'map',      tab: 'map', wait: 1800 },
-  { name: 'info',     tab: 'info' }
+  { name: 'info',     tab: 'info' },
+  { name: 'goals',    tab: 'info', heading: 'Trip goals' }  // scroll to the goal lists card
 ];
 
 (async () => {
@@ -48,21 +49,35 @@ const SHOTS = [
   const base = 'http://localhost:' + server.address().port + '/index.html';
   const browser = await chromium.launch({ executablePath: process.env.PWEXEC || undefined });
 
-  async function shoot(ctx, name, tab, wait) {
+  async function shoot(ctx, s) {
     const page = await ctx.newPage();
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(900);
-    await page.click('nav.tabs button[data-tab="' + tab + '"]');
-    await page.waitForTimeout(wait || 500);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.screenshot({ path: path.join(ROOT, 'docs', 'screenshot-' + name + '.png') }); // viewport crop
-    console.log('wrote docs/screenshot-' + name + '.png');
+    await page.click('nav.tabs button[data-tab="' + s.tab + '"]');
+    await page.waitForTimeout(s.wait || 500);
+    if (s.heading) {
+      // Scroll the card with this heading just below the sticky header + tabs.
+      await page.evaluate(function (txt) {
+        var h = Array.prototype.slice.call(document.querySelectorAll('.card h2'))
+          .find(function (x) { return x.textContent.trim().indexOf(txt) !== -1; });
+        if (!h) return;
+        var stick = 0;
+        document.querySelectorAll('header.app, nav.tabs').forEach(function (e) { stick += e.offsetHeight; });
+        var y = h.closest('.card').getBoundingClientRect().top + window.scrollY - stick - 8;
+        window.scrollTo(0, Math.max(0, y));
+      }, s.heading);
+      await page.waitForTimeout(200);
+    } else {
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+    await page.screenshot({ path: path.join(ROOT, 'docs', 'screenshot-' + s.name + '.png') }); // viewport crop
+    console.log('wrote docs/screenshot-' + s.name + '.png');
     await page.close();
   }
 
   // Light theme, one phone screen each
   const ctx = await browser.newContext({ viewport: VIEW, deviceScaleFactor: 1 });
-  for (const s of SHOTS) await shoot(ctx, s.name, s.tab, s.wait);
+  for (const s of SHOTS) await shoot(ctx, s);
   await ctx.close();
 
   // Dark theme (schedule)
