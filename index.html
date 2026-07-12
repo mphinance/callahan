@@ -1180,7 +1180,10 @@ function renderSchedule(){
     var nxt=filtering ? null : day.schedule[i+1];
     if(nxt){
       var leg=legEstimate(p, nxt.place && placeById[nxt.place], day);
-      if(leg && leg.mode!=="same"){
+      // Only a forward, sequential step gets a travel leg. Two stops that start at
+      // the same time are parallel (a group splitting up), so a drive between them
+      // is meaningless and must not be flagged as a conflict.
+      if(leg && leg.mode!=="same" && hmMin(nxt.start)>hmMin(item.start)){
         var gapMin=Math.round((zonedEpoch(day.date,nxt.start,tz)-zonedEpoch(day.date,item.end,tz))/60000);
         var tight=leg.min-gapMin>cfg.graceMin;   // only flag a meaningful shortfall, not a 2 min walk into a 0 gap
         var label=(leg.mode==="walk"?"~"+leg.min+" min walk":"~"+leg.min+" min drive")+" · "+fmtDist(leg.road);
