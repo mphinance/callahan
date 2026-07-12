@@ -93,8 +93,8 @@
       "notes": ["Buy and scan tickets plus Fast Lane on the cabin wifi tonight."],
       "schedule": [
         { "start": "14:00", "end": "14:15", "title": "Roll out of Colgate", "place": "home", "who": "Everyone", "note": "1pm Central. Windy, expect crosswinds on I-90 by the lake." },
-        { "start": "16:30", "end": "17:30", "title": "Lunch at Das Dutchman Essenhaus", "place": "essenhaus", "who": "Everyone", "flex": true, "note": "Family-style and a slice of pie to break up the drive." },
-        { "start": "20:45", "end": "21:15", "title": "Check in at the KOA cabin", "place": "koa", "who": "Everyone", "note": "Unload, light the fire pit, cupcakes and candles for the birthday-eve." }
+        { "start": "18:00", "end": "19:00", "title": "Lunch at Das Dutchman Essenhaus", "place": "essenhaus", "who": "Everyone", "flex": true, "note": "Family-style and a slice of pie to break up the drive." },
+        { "start": "22:30", "end": "23:00", "title": "Check in at the KOA cabin", "place": "koa", "who": "Everyone", "note": "Long haul with the time change. Unload, light the fire pit, cupcakes and candles for the birthday-eve." }
       ]
     },
     {
@@ -118,7 +118,7 @@
       "schedule": [
         { "start": "09:00", "end": "10:00", "title": "Pack up and check out", "place": "koa", "who": "Everyone" },
         { "start": "12:30", "end": "13:30", "title": "Lunch at Tony Packo's, Toledo", "place": "packos", "who": "Everyone", "flex": true, "note": "Hungarian dogs on the way out of Ohio." },
-        { "start": "13:30", "end": "18:30", "title": "Drive home to Colgate", "place": "home", "note": "About 4 more hours, plus the hour back to Central time." }
+        { "start": "13:30", "end": "18:30", "title": "Drive home to Colgate", "note": "About 4 more hours, plus the hour back to Central time." }
       ]
     }
   ]
