@@ -85,6 +85,25 @@ Three tabs, no backend, no build step.
   a leg does not fit the gap between two stops it turns red and a "Timing check"
   card calls out the days where two things are too far apart to share. Tune it
   with an optional `travel` block, or leave it to sensible defaults.
+- **Opening hours** - Give a stop an open window (`open` on a place, or
+  `window`/`earliest`/`latest` on a schedule item) and the Schedule tab shows a
+  clock pill: neutral when the planned start is inside the window, red when it is
+  outside. On the current day the live card and the up-in-5 nudge warn when the
+  plan would arrive outside the window. Fully optional and data-driven.
+- **Flex replan** - Mark a block `flex: true` and it can slide when you run
+  behind; everything else stays anchored (a booked, fixed-time thing). When the
+  day slips, the "right now" card offers to push the flexible blocks by +15/+30/+60
+  and names the tradeoff: which fixed blocks you still make and which are now at
+  risk ("push the beach an hour and you still make the fish boil, but the
+  lighthouse tour is at risk"). Schedule rows show a Flex or Fixed pill and a
+  projected-time badge. It never rewrites your plan, remembers the slip per day
+  offline, and a confirmed booking keeps its block anchored. Fully optional.
+- **Who wants what** - List your group in `team.members[]`, then tag schedule
+  items, trip goals, and bookings with a `who`. The app shows small initial chips
+  per person (colors derived offline from the name) and a filter above the
+  Schedule and Trip goals: pick a person to see just their wants, or "Everyone
+  agrees" to see only what the whole group is on. Fully optional; nothing shows
+  until there are two or more members.
 
 Times respect the event's `timezone`, so a trip in another zone still shows
 the right clock. The whole thing installs to the home screen and works offline.

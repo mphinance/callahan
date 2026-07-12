@@ -33,7 +33,8 @@ same internal shape, so single-day files never need a `days` array.
     "emoji": "🚗",                     // optional badge glyph (defaults to 👥)
     "rank": "The Hankos",
     "name": "optional",
-    "note": "Free-form clarifier shown on the Info tab."
+    "note": "Free-form clarifier shown on the Info tab.",
+    "members": [ /* optional people, see "Who wants what" below */ ]
   },
 
   "bring":  ["Layers", "Swimsuits"],   // optional; saved checklist on Info
@@ -61,6 +62,50 @@ same internal shape, so single-day files never need a `days` array.
 }
 ```
 
+## Who wants what (`team.members` and `who`)
+
+Optional. When you travel with a group, different people want different things.
+List the people once in `team.members[]`, then tag schedule items, trip-goal
+entries, and bookings with a `who`. The app draws small initial chips and adds a
+filter above the Schedule and Trip goals so the group can see where wants overlap
+("what does everyone agree on") and where they will split up ("just Dad's").
+
+```jsonc
+"team": {
+  "rank": "The Hankos",
+  "members": [
+    { "name": "Dad", "color": "#1d9bd1", "initials": "D", "emoji": "🧔" },
+    { "name": "Mom", "color": "#e4562b" },   // initials derived from the name
+    { "name": "Ivy" },                        // color derived from a name hash, offline
+    "Theo"                                     // a bare string becomes { name: "Theo" }
+  ]
+}
+```
+
+Every member field except `name` is optional. `color` defaults to a stable
+offline color hashed from the name, `initials` to the first letters ("Mary Beth"
+becomes "MB"), and `emoji`, when set, shows on the chip instead of the initials.
+
+A `who` attaches in three places and always degrades array to string to absent:
+
+```jsonc
+{ "title": "Super Splash", "who": ["Dad", "Ivy"] }   // schedule item
+{ "text": "Earn the patch", "who": ["Ivy"] }          // trip-goal item (list-level who is the default)
+{ "title": "Kayak rental", "who": ["Dad", "Ivy"] }    // booking
+```
+
+Accepted `who` values: an array of names, a single name string, or `"Everyone"`
+(expands to all members and collapses to one `ALL` chip). A name that is not a
+member still shows as a dashed "unknown" chip and stays filterable. Bookings keep
+their existing free-text behavior: `who` becomes chips only when every token is a
+known member, so `"who": "One adult per den"` stays plain text.
+
+The filter is in-memory (optionally remembered per event under
+`daykit:<event.id>:whofilter`) and has two modes: "Anyone" (show items at least
+one selected person wants) and "Everyone agrees" (show only items every selected
+person is on). It renders nothing when there are fewer than two members, so a
+file without `members` is unchanged.
+
 ## `lists` (trip goals)
 
 Optional priority checklists on the Info tab, saved offline per item like the
@@ -75,7 +120,11 @@ tone-colored pill and a "N of M done" progress line.
                                  // other string (neutral styling). Sets color + pill.
     "title": "The whole point",  // optional; falls back to a tone default label
     "note": "Try to hit them all.", // optional subtitle under the heading
-    "items": ["Ride the coaster", "Earn the patch"]  // the checklist entries
+    "who": "Everyone",           // optional list-level default (see "Who wants what")
+    "items": [                   // the checklist entries: strings or {text, who}
+      "Ride the coaster",                            // inherits the list-level who
+      { "text": "Earn the patch", "who": ["Ivy"] }   // per-item who overrides it
+    ]
   },
   {
     "tone": "stretch",
@@ -115,7 +164,8 @@ your ticks persist offline per item like the packing list (under the
     "ref": "WSI-88213",      // optional confirmation or reference number
     "url": "https://...",    // optional booking link (Book / View)
     "place": "lighthouse",   // optional place id; adds a Directions link
-    "who": "Everyone",       // optional, who it's for
+    "who": "Everyone",       // optional; free text, or member names for chips
+                             // (see "Who wants what")
     "note": "Sells out in summer."  // optional free text
   }
 ]
@@ -124,6 +174,78 @@ your ticks persist offline per item like the packing list (under the
 A string shorthand is accepted and treated as a `todo` with just a title:
 `"bookings": ["Book the ferry", "Reserve a campsite"]`. Omit `bookings`
 entirely and the section does not appear.
+
+## Opening hours and time windows
+
+Optional. A stop that is only available certain hours (a tour on the hour, a
+tide window, a seasonal or daylight-only spot). The window can live in two
+places that feed the same check:
+
+- On a **place**, as `open`. Intrinsic hours that apply every day the place is
+  visited.
+- On a **schedule item**, as `window` (or the flat `earliest`/`latest`). A
+  per-occurrence constraint that overrides the place's `open` for that one stop,
+  which cleanly handles seasonal or per-day differences.
+
+The effective window for a stop is the item constraint if present, else the
+place's `open`, else none. All of these shapes are accepted for either field:
+
+```jsonc
+"open": "10:00-16:00"                            // string shorthand
+"open": ["10:00", "16:00"]                        // pair
+"open": [["10:00","16:00"], ["18:00","20:00"]]    // multiple windows
+"open": { "label": "Tours on the hour", "windows": [["10:00","16:00"]] }
+
+"window": "11:00-14:00"                            // same shapes on an item
+"earliest": "11:00", "latest": "14:00"            // flat shorthand
+```
+
+Times are wall-clock `HH:MM` in the event timezone and are compared as
+minutes-since-midnight, so no timezone math is involved. A window whose start is
+later than its end wraps past midnight (for example `"22:00-02:00"`). Multiple
+windows are comma-joined and a time matches if it falls inside any of them.
+
+A windowed stop shows a small clock pill on the Schedule tab: neutral when the
+planned start is inside the window, red when it is outside. On the current day,
+the live "right now / up next" card and the up-in-5 nudge add a warning when the
+plan would land outside the window. The app checks the window bounds, not an
+hourly cadence, so "Tours on the hour" is modeled as one continuous window with
+a descriptive `label` that becomes the pill text. Absent or malformed values
+render nothing, so older files are unaffected.
+
+## Flex vs fixed, and the replan slip (`flex` and `booking`)
+
+Optional. Mark a schedule block `flex: true` when it can slide later (a hike, a
+beach, an open-ended stroll). Everything else is **anchored** by default: a
+booked, fixed-time thing that should not move. An old file has no `flex` items,
+so the feature stays inert and paints nothing, and a tour never moves because
+the author forgot a flag. The author opts into looseness.
+
+```jsonc
+{ "start": "09:30", "end": "12:00", "title": "Hike Peninsula State Park", "flex": true }
+{ "start": "18:00", "end": "20:00", "title": "Fish boil", "flex": true, "booking": "WSI-88213" }
+```
+
+When the current day runs behind (auto-detected when a flex block runs past its
+printed end, or when you tap a +15 / +30 / +60 control), the "right now" card
+grows a calm, collapsible slip panel. It slides the flexible blocks by that many
+minutes and names the tradeoff: which anchored blocks you still make and which
+ones the slide now threatens ("push the beach an hour and you still make the
+6:00 fish boil, but the lighthouse tour is at risk"). On the Schedule tab each
+row shows a **Flex** or **Fixed** pill, and while a slip is active the flexible
+rows get a projected-time overlay badge next to the printed time.
+
+The slide is **ephemeral**. It never rewrites `event.json` or the printed times.
+Your declared slip is stored per day under `daykit:<event.id>:slip:<date>` (so
+multi-day trips and a mid-afternoon relaunch both work), Reset clears it, and it
+auto-clears when the day is over. Conflict math is done in pure epoch time, so it
+stays correct across a DST boundary.
+
+**Booking tie:** a `booking` on an item matches a `bookings[]` entry by its `ref`
+or its exact `title`. If that booking is `confirmed`, the item is forced anchored
+even when marked `flex`. As a cheaper fallback, an item whose `place` equals a
+confirmed booking's place is also treated as anchored. This keeps a locked-in
+reservation from sliding, and adds nothing to the bookings schema.
 
 ## `schedule` items
 
@@ -135,7 +257,14 @@ entirely and the section does not appear.
   "also": "beach",       // optional, a second place id shown in the subtitle
   "note": "bring water", // optional free text in the subtitle
   "session": 1,          // optional, shows a numbered pill
-  "all": true            // optional, "ALL" pill + highlight (whole-group block)
+  "all": true,           // optional, "ALL" pill + highlight (whole-group block)
+  "window": "11:00-14:00", // optional open window for this stop (see Opening hours)
+  // "earliest": "11:00", "latest": "14:00"  // flat shorthand for the same thing
+  "who": ["Dad", "Ivy"],  // optional, who wants this (see "Who wants what")
+  "flex": true,          // optional. This block can slide later when you run behind.
+                         // Absent or false means anchored (a fixed-time thing).
+  "booking": "WSI-88213" // optional. Ties this block to a bookings[] entry by ref
+                         // or exact title. A confirmed booking forces it anchored.
 }
 ```
 
@@ -150,7 +279,8 @@ entirely and the section does not appear.
   "lat": 45.1316, "lng": -87.2412,
   "address": "optional",       // shown for lodging on the Info tab
   "desc": "optional popup text",
-  "days": ["2026-07-17"]       // optional: limit this pin to specific day dates
+  "days": ["2026-07-17"],      // optional: limit this pin to specific day dates
+  "open": "10:00-16:00"        // optional open window (see Opening hours)
 }
 ```
 
@@ -214,6 +344,9 @@ place, render no chip.
   directions to the next stop.
 - On any other day, it shows that day's plan with a "coming up" or "past day"
   header and no live highlighting.
+- When the current day has flexible blocks (`flex: true`) and you fall behind,
+  the "right now" card offers a slip panel that slides them and names which
+  anchored blocks stay safe versus at risk. See "Flex vs fixed" above.
 - On multi-day trips, the header shows the date range and "Day X of N" or a
   countdown to the trip. The day switcher defaults to today when the trip is
   running.

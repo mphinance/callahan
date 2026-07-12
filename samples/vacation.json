@@ -9,7 +9,15 @@
   },
   "location": { "name": "Fish Creek, Door County, WI", "lat": 45.1319, "lng": -87.2409, "zoom": 12 },
   "travel": { "roadFactor": 1.3, "mph": 45, "walkUnderMi": 0.3 },
-  "team": { "emoji": "🚗", "rank": "The Hankos", "note": "Loose plan. Weather and ferry times can shuffle the days." },
+  "team": {
+    "emoji": "🚗", "rank": "The Hankos", "note": "Loose plan. Weather and ferry times can shuffle the days.",
+    "members": [
+      { "name": "Dad", "color": "#1d9bd1", "emoji": "🧔" },
+      { "name": "Mom", "color": "#e4562b" },
+      { "name": "Ivy" },
+      "Theo"
+    ]
+  },
   "bring": [
     "Layers and a rain shell (lake weather turns fast)",
     "Swimsuits and towels for Nicolet Bay Beach",
@@ -22,7 +30,7 @@
     { "title": "Pelletier's fish boil, dinner seating", "status": "confirmed", "when": "Fri Jul 17, 6:00pm", "ref": "Table for 4", "place": "dinnerfc", "note": "The boil-over is at 6:30. Do not be late for it." },
     { "title": "Eagle Bluff Lighthouse tour", "status": "todo", "by": "2026-07-15", "when": "Sat Jul 18, around 12:15pm", "place": "lighthouse", "url": "https://doorcountyhistoricalsociety.org", "note": "Tours sell out in summer. Grab the noon slot before it fills." },
     { "title": "Washington Island ferry", "status": "todo", "by": "2026-07-16", "who": "If we get the time", "url": "https://wisferry.com", "note": "Stretch goal. Check the last return time before committing the day to it." },
-    { "title": "Kayak rental at Nicolet Bay", "status": "waitlist", "when": "Sat Jul 18 afternoon", "place": "beach", "note": "Called ahead. They will hold two boats if an afternoon slot opens up." }
+    { "title": "Kayak rental at Nicolet Bay", "status": "waitlist", "when": "Sat Jul 18 afternoon", "place": "beach", "who": ["Dad","Ivy"], "note": "Called ahead. They will hold two boats if an afternoon slot opens up." }
   ],
   "lists": [
     {
@@ -42,8 +50,8 @@
       "note": "Would be super awesome if the weather and time cooperate.",
       "items": [
         "Tour Eagle Bluff Lighthouse",
-        "Kayak the shoreline from Nicolet Bay",
-        "Take the ferry to Washington Island",
+        { "text": "Kayak the shoreline from Nicolet Bay", "who": ["Dad","Ivy"] },
+        { "text": "Take the ferry to Washington Island", "who": ["Ivy","Theo"] },
         "Catch sunset at the tip in Gills Rock"
       ]
     }
@@ -57,7 +65,7 @@
     { "id": "inn",        "name": "Whistling Swan Inn",     "kind": "lodging",  "icon": "lodging",   "lat": 45.1316, "lng": -87.2412, "address": "4192 Main St, Fish Creek", "desc": "Home base for all three nights." },
     { "id": "coffee",     "name": "Blue Horse Cafe",        "kind": "food",     "icon": "coffee",    "lat": 45.1332, "lng": -87.2416, "desc": "Morning coffee and pastries." },
     { "id": "pennpark",   "name": "Peninsula State Park",   "kind": "sight",    "icon": "hike",      "lat": 45.1385, "lng": -87.2380, "desc": "Trails, tower, and the golf course." },
-    { "id": "lighthouse", "name": "Eagle Bluff Lighthouse", "kind": "sight",    "icon": "sight",     "lat": 45.1704, "lng": -87.2456, "desc": "1868 lighthouse tours on the hour." },
+    { "id": "lighthouse", "name": "Eagle Bluff Lighthouse", "kind": "sight",    "icon": "sight",     "lat": 45.1704, "lng": -87.2456, "open": { "label": "Tours on the hour", "windows": [["10:00","16:00"]] }, "desc": "1868 lighthouse tours on the hour." },
     { "id": "beach",      "name": "Nicolet Bay Beach",      "kind": "water",    "icon": "beach",     "lat": 45.1520, "lng": -87.2280, "desc": "Sandy swim beach and kayak rental." },
     { "id": "dinnerfc",   "name": "Pelletier's Fish Boil",  "kind": "food",     "icon": "food",      "lat": 45.1310, "lng": -87.2402, "desc": "The classic Door County fish boil." },
     { "id": "sisterbay",  "name": "Al Johnson's, Sister Bay","kind": "food",    "icon": "food",      "lat": 45.1897, "lng": -87.1265, "desc": "Swedish pancakes. Goats on the roof." },
@@ -72,18 +80,18 @@
       "notes": ["Check-in is 3pm. Park on Cottage Row if Main St is full."],
       "schedule": [
         { "start": "15:00", "end": "16:00", "title": "Check in at the inn", "place": "inn" },
-        { "start": "16:00", "end": "17:30", "title": "Walk Fish Creek village", "place": "coffee" },
-        { "start": "18:00", "end": "20:00", "title": "Fish boil dinner", "place": "dinnerfc" }
+        { "start": "16:00", "end": "17:30", "title": "Walk Fish Creek village", "place": "coffee", "flex": true },
+        { "start": "18:00", "end": "20:00", "title": "Fish boil dinner", "place": "dinnerfc", "flex": true, "booking": "Pelletier's fish boil, dinner seating" }
       ]
     },
     {
       "date": "2026-07-18",
       "title": "Park + beach day",
       "schedule": [
-        { "start": "08:30", "end": "09:15", "title": "Coffee and pastries", "place": "coffee" },
-        { "start": "09:30", "end": "12:00", "title": "Hike Peninsula State Park", "place": "pennpark" },
-        { "start": "12:15", "end": "13:00", "title": "Eagle Bluff Lighthouse tour", "place": "lighthouse" },
-        { "start": "13:30", "end": "16:30", "title": "Nicolet Bay Beach and kayaks", "place": "beach" },
+        { "start": "08:30", "end": "09:15", "title": "Coffee and pastries", "place": "coffee", "flex": true },
+        { "start": "09:30", "end": "12:00", "title": "Hike Peninsula State Park", "place": "pennpark", "who": ["Dad","Ivy","Theo"], "flex": true },
+        { "start": "12:15", "end": "13:00", "title": "Eagle Bluff Lighthouse tour", "place": "lighthouse", "who": ["Mom","Dad"] },
+        { "start": "13:30", "end": "16:30", "title": "Nicolet Bay Beach and kayaks", "place": "beach", "who": "Everyone", "flex": true },
         { "start": "18:30", "end": "20:00", "title": "Dinner in Sister Bay", "place": "sisterbay" }
       ]
     },
@@ -93,7 +101,7 @@
       "closingNote": "Safe drive home. Cherry pie for the road is mandatory.",
       "schedule": [
         { "start": "09:00", "end": "10:00", "title": "Pack and check out", "place": "inn" },
-        { "start": "10:15", "end": "12:00", "title": "Cave Point cliffs", "place": "cavepoint" },
+        { "start": "10:15", "end": "12:00", "title": "Cave Point cliffs", "place": "cavepoint", "window": "11:00-14:00" },
         { "start": "12:30", "end": "14:00", "title": "Lunch in Sturgeon Bay", "place": "sturgeon" },
         { "start": "14:15", "end": "14:45", "title": "Cherry pie stop", "place": "cherry" },
         { "start": "15:00", "end": "18:00", "title": "Drive home", "note": "~2.5 hrs to Milwaukee" }
