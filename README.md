@@ -81,8 +81,10 @@ the right clock. The whole thing installs to the home screen and works offline.
 | Schedule | Kids mode |
 |:--:|:--:|
 | ![Schedule tab](docs/screenshot-schedule.png) | ![Kids tab](docs/screenshot-kids.png) |
-| **Info** | **Dark mode** |
-| ![Info tab](docs/screenshot-info.png) | ![Dark mode](docs/screenshot-dark.png) |
+| **Info** | **Trip goals** |
+| ![Info tab](docs/screenshot-info.png) | ![Trip goals](docs/screenshot-goals.png) |
+| **Dark mode** | |
+| ![Dark mode](docs/screenshot-dark.png) | |
 
 Regenerate them anytime with `npm run shots` (or `node screenshots.js`). The
 script serves the repo, drives each tab, and writes the PNGs to `docs/`. Run
