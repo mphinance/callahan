@@ -1,93 +1,122 @@
 {
-  "id": "summer-blast-west-bear",
-  "title": "Summer Blast Adventure WEST",
-  "subtitle": "PAC Cub Scout Day Camp",
-  "date": "2026-07-11",
-  "timezone": "America/Chicago",
-  "team": {
-    "name": "Popsicle Pirates",
-    "rank": "Bear",
-    "note": "Tiger and Wolf ride with the Beach Ballers. You are a Bear, so you follow the Popsicle Pirates column."
-  },
+  "id": "red-rock-roadtrip",
+  "title": "Red Rock Road Trip",
+  "subtitle": "3 days in Zion and Bryce Canyon",
+  "timezone": "America/Denver",
   "theme": {
-    "primary": "#f28c1a",
-    "accent": "#e4562b",
-    "sun": "#f2b21a",
-    "water": "#1d9bd1",
-    "ink": "#2a1a00",
-    "bg": "#fff7ea",
+    "primary": "#c1502e",
+    "accent": "#9e3418",
+    "sun": "#e8a24a",
+    "water": "#3f8f7a",
+    "ink": "#2a1206",
+    "bg": "#fbf3ea",
     "card": "#ffffff"
   },
-  "location": {
-    "name": "St. John's Northwestern Academy",
-    "address": "1101 N Genesee St, Delafield, WI 53018",
-    "lat": 43.06565,
-    "lng": -88.40245,
-    "zoom": 17
+  "location": { "name": "Springdale, Utah", "lat": 37.1889, "lng": -112.9983, "zoom": 11 },
+  "travel": { "roadFactor": 1.5, "mph": 40, "walkUnderMi": 0.25 },
+  "team": {
+    "emoji": "🏜️",
+    "rank": "The Trail Crew",
+    "note": "Sam and Theo are chasing the big climbs. Maya and Ana are here for the easy trails and the views. Everyone meets up for the Narrows and the sunrises.",
+    "members": [
+      { "name": "Sam", "color": "#c1502e", "emoji": "🥾" },
+      { "name": "Maya", "color": "#3f8f7a" },
+      { "name": "Theo", "color": "#4b6bd6" },
+      { "name": "Ana" }
+    ]
   },
   "bring": [
-    "Swimsuit and towel (Super Splash + Swimming)",
-    "Sunscreen, hat, refillable water bottle",
-    "Closed-toe shoes for Archery and BB Guns",
-    "Name tag (turn it in at the end for your patch and medal)"
+    "Broken-in hiking shoes and blister tape",
+    "3 liters of water per person (desert heat)",
+    "Sun hat, sunglasses, and SPF 50",
+    "Quick-dry layers and a rain shell for the Narrows",
+    "Headlamp for the pre-dawn Bryce sunrise",
+    "Reusable bottles and a couple of trail snacks"
+  ],
+  "bookings": [
+    { "title": "Cable Mountain Lodge, 2 nights", "status": "confirmed", "when": "Jul 18 to 19", "ref": "CML-88213", "place": "lodge_zion", "who": "Everyone", "note": "Steps from the Zion pedestrian entrance." },
+    { "title": "Oscar's Cafe dinner", "status": "confirmed", "when": "Sat Jul 18, 7:00pm", "ref": "Table for 4", "place": "oscars", "note": "Ask for the patio if the wind is calm." },
+    { "title": "Angels Landing permit", "status": "todo", "by": "2026-07-17", "who": ["Sam", "Theo"], "url": "https://recreation.gov", "note": "Seasonal lottery on recreation.gov. Apply the day before by 4pm Mountain." },
+    { "title": "Bryce Canyon Lodge room", "status": "waitlist", "by": "2026-07-05", "url": "https://brycecanyonforever.com", "note": "Books out months ahead. We are on the cancellation list, otherwise it is Ruby's Inn." }
   ],
   "lists": [
     {
       "tone": "must",
       "title": "The whole point",
-      "note": "The reasons we came. Try to hit every one.",
+      "note": "The reasons we drove all this way. Do not leave without them.",
+      "who": "Everyone",
       "items": [
-        "Earn the camp patch and medal (turn in your name tag)",
-        "Shoot at both Archery and BB Guns",
-        "Launch a bottle rocket",
-        "Cool off at Super Splash"
+        { "text": "Summit Angels Landing and clip the chains", "who": ["Sam", "Theo"] },
+        "Wade up the Narrows in the Virgin River",
+        "Catch first light over the hoodoos at Bryce",
+        "Walk the Navajo Loop down into the amphitheater"
       ]
     },
     {
       "tone": "stretch",
       "title": "Bonus adventures",
-      "note": "Would be super awesome if we get the time.",
+      "note": "Would be amazing if the light and the legs cooperate.",
       "items": [
-        "Find a geocache at the Geocaching station",
-        "Climb into every rig at Touch a Truck",
-        "Catch the giant water balloon toss at closing",
-        "Make a new friend from another den"
+        "Stargaze at Bryce (it is a Dark Sky park)",
+        { "text": "Sunrise scramble to Observation Point", "who": ["Sam", "Theo"] },
+        "Drive the Zion-Mount Carmel tunnel at golden hour",
+        "Cowboy breakfast at Ruby's before the drive home"
       ]
     }
   ],
-  "closingNote": "Turn in your name tag to receive your patch and medal.",
   "notes": [
-    "At the end of the day, turn in your name tag to receive your patch and medal.",
-    "Session times are tight. When a block ends, walk straight to the next station.",
-    "Lunch is combined with Touch a Truck for Tiger, Wolf, and Bear."
+    "Zion Canyon is car-free April to October. Ride the free shuttle from the visitor center.",
+    "Flash floods can close the Narrows with no warning. Check the ranger forecast that morning.",
+    "The Springdale to Bryce leg is a real drive. The Schedule tab flags any day that is too tight."
   ],
+  "closingNote": "Dusty boots, full memory cards, safe drive home.",
   "places": [
-    { "id": "field",         "name": "Main Field / Flags",  "kind": "hub",      "icon": "flag",    "lat": 43.06560, "lng": -88.40248, "desc": "Registration, flag ceremony, and closing." },
-    { "id": "pathfinders",   "name": "Pathfinders",         "kind": "activity", "icon": "compass", "lat": 43.06618, "lng": -88.40268, "desc": "Scout skills and orienteering." },
-    { "id": "geocaching",    "name": "Geocaching",          "kind": "activity", "icon": "compass", "lat": 43.06598, "lng": -88.40255, "desc": "GPS treasure hunt station." },
-    { "id": "supersplash",   "name": "Super Splash",        "kind": "water",    "icon": "water",   "lat": 43.06622, "lng": -88.40190, "desc": "Water games. Bring a swimsuit and towel." },
-    { "id": "touchatruck",   "name": "Touch a Truck",       "kind": "activity", "icon": "truck",   "lat": 43.06628, "lng": -88.40120, "desc": "Climb on the big rigs during lunch." },
-    { "id": "swimming",      "name": "Swimming",            "kind": "water",    "icon": "water",   "lat": 43.06620, "lng": -88.40075, "desc": "British Swim School of St. John's pool." },
-    { "id": "archery",       "name": "Archery",             "kind": "activity", "icon": "target",  "lat": 43.06478, "lng": -88.40340, "desc": "Teach then shoot. Closed-toe shoes required." },
-    { "id": "bbguns",        "name": "BB Guns",             "kind": "activity", "icon": "target",  "lat": 43.06462, "lng": -88.40318, "desc": "Teach then shoot. Closed-toe shoes required." },
-    { "id": "bottlerockets", "name": "Bottle Rockets",      "kind": "activity", "icon": "rocket",  "lat": 43.06520, "lng": -88.40385, "desc": "Build and launch." },
-    { "id": "firstaid",      "name": "First Aid",           "kind": "service",  "icon": "aid",     "lat": 43.06562, "lng": -88.40282, "desc": "Medical station." },
-    { "id": "restrooms",     "name": "Restrooms",           "kind": "service",  "icon": "rest",    "lat": 43.06535, "lng": -88.40225, "desc": "Toilets." },
-    { "id": "lunch",         "name": "Lunch",               "kind": "service",  "icon": "lunch",   "lat": 43.06532, "lng": -88.40210, "desc": "Bag lunch pickup, combined with Touch a Truck." },
-    { "id": "parking",       "name": "Parking",             "kind": "service",  "icon": "parking", "lat": 43.06452, "lng": -88.40382, "desc": "Guest parking." }
+    { "id": "lodge_zion",   "name": "Cable Mountain Lodge",     "kind": "lodging", "icon": "lodging", "lat": 37.2005, "lng": -112.9862, "address": "147 Zion Park Blvd, Springdale, UT", "desc": "Home base for the two Zion nights." },
+    { "id": "visitor_zion", "name": "Zion Visitor Center",      "kind": "hub",     "icon": "compass", "lat": 37.2003, "lng": -112.9870, "open": "07:00-19:15", "desc": "Free shuttle hub. No private cars up the canyon in summer." },
+    { "id": "grotto",       "name": "The Grotto (Angels Landing)","kind": "sight", "icon": "hike",    "lat": 37.2593, "lng": -112.9515, "desc": "Trailhead for Angels Landing. Permit required for the chains." },
+    { "id": "emerald",      "name": "Emerald Pools",            "kind": "water",   "icon": "water",   "lat": 37.2503, "lng": -112.9578, "desc": "Shaded, easy loop to waterfalls and pools." },
+    { "id": "narrows",      "name": "Temple of Sinawava",       "kind": "water",   "icon": "beach",   "lat": 37.2853, "lng": -112.9479, "open": "07:00-19:15", "desc": "Last shuttle stop and the gateway to the Narrows." },
+    { "id": "oscars",       "name": "Oscar's Cafe",             "kind": "food",    "icon": "food",    "lat": 37.1901, "lng": -112.9945, "desc": "Green chile burgers and big portions in Springdale." },
+    { "id": "bryce_sunrise","name": "Bryce Sunrise Point",      "kind": "sight",   "icon": "star",    "lat": 37.6255, "lng": -112.1651, "desc": "The classic first-light view over the amphitheater." },
+    { "id": "navajo",       "name": "Navajo Loop, Sunset Point","kind": "sight",   "icon": "hike",    "lat": 37.6244, "lng": -112.1656, "desc": "Switchbacks down past Thor's Hammer into the hoodoos." },
+    { "id": "rubys",        "name": "Ruby's Inn, Bryce",        "kind": "food",    "icon": "coffee",  "lat": 37.6698, "lng": -112.1566, "desc": "Diner, general store, and the backup beds." },
+    { "id": "bryce_vc",     "name": "Bryce Visitor Center",     "kind": "service", "icon": "aid",     "lat": 37.6403, "lng": -112.1699, "desc": "Maps, water, and the shuttle for the amphitheater." }
   ],
-  "schedule": [
-    { "start": "08:00", "end": "08:30", "title": "Registration",                 "place": "field", "all": true },
-    { "start": "08:30", "end": "08:40", "title": "Flag Ceremony & Announcements", "place": "field", "all": true },
-    { "start": "08:40", "end": "08:45", "title": "Transition to Session 1",       "place": null,    "all": true, "transition": true },
-    { "session": 1, "start": "08:45", "end": "09:35", "title": "Pathfinders",                    "place": "pathfinders" },
-    { "session": 2, "start": "09:40", "end": "10:30", "title": "Archery Teach",                  "place": "archery" },
-    { "session": 3, "start": "10:35", "end": "11:25", "title": "Archery Shoot",                  "place": "archery" },
-    { "session": 4, "start": "11:25", "end": "12:10", "title": "Lunch + Touch a Truck",          "place": "lunch", "also": "touchatruck" },
-    { "session": 5, "start": "12:10", "end": "13:00", "title": "BB Gun Teach",                   "place": "bbguns" },
-    { "session": 6, "start": "13:05", "end": "13:55", "title": "BB Gun Shoot",                   "place": "bbguns" },
-    { "session": 7, "start": "14:05", "end": "14:55", "title": "Bottle Rockets",                 "place": "bottlerockets" },
-    { "session": 8, "start": "15:05", "end": "15:55", "title": "Super Splash",                   "place": "supersplash" },
-    { "start": "16:00", "end": "16:20", "title": "Closing Flags & Giant Water Balloon", "place": "field", "all": true }
+  "days": [
+    {
+      "date": "2026-07-18",
+      "title": "Arrive Zion",
+      "notes": ["Check-in is 3pm. Park once and take the shuttle from here on."],
+      "schedule": [
+        { "start": "14:00", "end": "15:00", "title": "Check in at the lodge", "place": "lodge_zion" },
+        { "start": "15:30", "end": "18:00", "title": "Shuttle up the canyon and Emerald Pools", "place": "emerald", "also": "visitor_zion", "who": "Everyone", "flex": true, "note": "Easy first hike to shake out the drive." },
+        { "start": "19:00", "end": "20:30", "title": "Dinner at Oscar's Cafe", "place": "oscars", "booking": "Table for 4" }
+      ]
+    },
+    {
+      "date": "2026-07-19",
+      "title": "Big Zion day",
+      "notes": ["The group splits in the morning and meets back up for the Narrows."],
+      "schedule": [
+        { "start": "07:00", "end": "07:40", "title": "Coffee and first shuttle", "place": "visitor_zion", "who": "Everyone" },
+        { "start": "10:30", "end": "13:30", "title": "Angels Landing and the chains", "place": "grotto", "who": ["Sam", "Theo"], "window": "06:00-10:00", "note": "Permit hike. Start early, it bakes and backs up by late morning." },
+        { "start": "10:30", "end": "13:00", "title": "Lower and Middle Emerald Pools", "place": "emerald", "who": ["Maya", "Ana"], "flex": true, "note": "The mellow parallel plan while the others climb." },
+        { "start": "14:30", "end": "17:30", "title": "Wade the Narrows", "place": "narrows", "who": "Everyone", "flex": true, "note": "Check the flash flood forecast before heading up." },
+        { "start": "19:00", "end": "20:15", "title": "Casual dinner in Springdale", "place": "oscars", "who": "Everyone", "flex": true }
+      ]
+    },
+    {
+      "date": "2026-07-20",
+      "title": "Zion to Bryce",
+      "closingNote": "Safe drive home. Cowboy breakfast optional but encouraged.",
+      "notes": ["This is the ambitious day. Let the timing check tell you what actually fits."],
+      "schedule": [
+        { "start": "07:30", "end": "08:30", "title": "Pack and check out", "place": "lodge_zion" },
+        { "start": "10:00", "end": "11:00", "title": "First light at Bryce Sunrise Point", "place": "bryce_sunrise", "who": "Everyone", "note": "Golden hour on the hoodoos." },
+        { "start": "11:30", "end": "13:30", "title": "Navajo Loop into the amphitheater", "place": "navajo", "who": "Everyone", "flex": true },
+        { "start": "13:45", "end": "14:45", "title": "Lunch at Ruby's Inn", "place": "rubys" },
+        { "start": "15:00", "end": "18:00", "title": "Drive home", "note": "Fill the tank in Panguitch. Long haul from here." }
+      ]
+    }
   ]
 }

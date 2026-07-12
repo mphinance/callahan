@@ -36,6 +36,18 @@ corner.
 > - Add a sensible `bring` checklist and a `closingNote`.
 > - Add a `lists` array with a `must` list (the whole point of the day) and a
 >   `stretch` list (bonus things to do if there is time).
+> - If anything has to be signed up, paid, or reserved ahead of time (forms,
+>   tickets, volunteer slots), add a `bookings` array with a `status` of
+>   `confirmed`, `todo`, or `waitlist` and a `by` deadline where one applies.
+> - If a stop is only open certain hours (a tour on the hour, a timed session),
+>   give its place an `open` window like `"10:00-16:00"`, or put a `window` on
+>   the schedule item when that one stop differs.
+> - If more than one person is going and they want different things, list the
+>   people in `team.members[]` (just names is fine) and add a `who` to the
+>   schedule items and `lists` entries that only some of them care about.
+> - If a block could slide when the day runs late (a free-play or cool-off
+>   session), mark it `"flex": true`. Leave fixed-time things (a timed session,
+>   a ceremony) anchored by omitting the flag.
 >
 > Output only the `event.json`.
 
@@ -56,6 +68,25 @@ corner.
 >   `notes`.
 > - Add a `lists` array with a `must` list (the reasons for the trip) and a
 >   `stretch` list (would-be-awesome extras if time allows).
+> - Add a `bookings` array for anything that needs a reservation or ticket
+>   (hotels, tours, dinners, ferries, permits), each with a `status`
+>   (`confirmed`, `todo`, or `waitlist`) and a `by` book-by deadline where the
+>   thing sells out or has a cutoff.
+> - Geocode every place accurately. The drive-time chips between stops are only
+>   as good as the `lat`/`lng`, so precise coordinates make the "too far apart to
+>   share a day" timing check trustworthy.
+> - For any stop with limited hours (a lighthouse tour, a tide window, a timed
+>   entry), add an `open` window to its place like `"10:00-16:00"`, or a `window`
+>   on the schedule item when a single day differs.
+> - List the travelers in `team.members[]` (a bare name string works, or add a
+>   `color`/`emoji`) and tag the schedule items, `lists` goals, and `bookings`
+>   that only some of them want with a `who` like `["Dad", "Ivy"]` or
+>   `"Everyone"`, so the group can filter to one person's wants.
+> - Mark the loose blocks that can slide when the day runs behind (a hike, a
+>   beach, an open afternoon) with `"flex": true`, and leave the booked,
+>   fixed-time things (a tour, a dinner seating, a ferry) anchored by omitting
+>   the flag. Where a block is a reservation, tie it with `"booking"` to that
+>   `bookings[]` entry's `ref` or title so a confirmed one stays put.
 >
 > Output only the `event.json`.
 
