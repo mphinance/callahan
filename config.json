@@ -21,6 +21,14 @@
 
   "trips": [
     {
+      "slug": "obsidian",
+      "title": "Project Obsidian",
+      "subtitle": "Iceland and the Faroes on the Norwegian Star",
+      "dates": "Aug 7 to 16, 2026",
+      "emoji": "🪨",
+      "primary": "#5b3e8c"
+    },
+    {
       "slug": "zion",
       "title": "Red Rock Road Trip",
       "subtitle": "3 days in Zion and Bryce Canyon",
