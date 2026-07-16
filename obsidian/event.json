@@ -32,7 +32,7 @@
     "Portable battery and a plug adapter (Europlug Type F, 230V)"
   ],
   "bookings": [
-    { "title": "Flight out: Icelandair 852, ORD to KEF", "status": "confirmed", "when": "Fri Aug 7, 7:45pm", "ref": "AIR-OBSIDIAN", "place": "ord", "who": "Everyone", "note": "Overnight crossing. Lands in Iceland the next morning." },
+    { "title": "Flight out: Icelandair 852, ORD to KEF", "status": "confirmed", "when": "Fri Aug 7, 7:25pm", "ref": "AIR-OBSIDIAN", "place": "ord", "who": "Everyone", "note": "Overnight crossing, lands 6:40am Saturday. Miss this one and the airline cancels the flight home too, so do not cut it fine." },
     { "title": "Old Town Reykjavik", "status": "confirmed", "when": "Aug 8", "ref": "STAY-OBSIDIAN", "place": "hotel_rvk", "who": "Everyone", "note": "One night before the ship. Walkable to everything downtown." },
     { "title": "Norwegian Star, 7 nights", "status": "confirmed", "when": "Aug 9 to 16", "ref": "NCL-OBSIDIAN", "place": "pier312", "who": "Everyone", "note": "Freestyle cruising. No fixed dining times, no formal nights." },
     { "title": "Flight home: Icelandair 855, KEF to ORD", "status": "confirmed", "when": "Sun Aug 16, 7:45pm Iceland time", "ref": "AIR-OBSIDIAN", "place": "kef", "who": "Everyone", "note": "Lands O'Hare 9:25pm the same evening. Flying west you gain 5 hours back." },
@@ -108,7 +108,7 @@
         { "start": "13:30", "end": "15:30", "title": "Drive to O'Hare", "place": "ord", "who": "Everyone", "flex": true, "note": "Leaving early is the whole plan. Friday evening into Chicago is the part that used to break." },
         { "start": "15:30", "end": "16:30", "title": "Park and shuttle to the terminal", "place": "ord", "note": "Off-site lots add 20 to 30 minutes. Terminal 5 for Icelandair." },
         { "start": "16:30", "end": "18:00", "title": "Bag drop, security, gate", "place": "ord", "note": "International bag drop closes 60 minutes out." },
-        { "start": "19:25", "end": "20:25", "title": "Icelandair 852 departs", "place": "ord", "booking": "AIR-OBSIDIAN", "who": "Everyone", "note": "Published schedule is 7:25pm, but the calendar says 7:45pm. Check the confirmation. Overnight, 6h15, lands 6:40am." }
+        { "start": "19:25", "end": "20:25", "title": "Icelandair 852 departs", "place": "ord", "booking": "AIR-OBSIDIAN", "who": "Everyone", "note": "7:25pm, not 7:45. The ticket says so. Overnight, 6h15, lands Reykjavik 6:40am." }
       ]
     },
     {
