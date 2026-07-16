@@ -35,10 +35,12 @@
     { "title": "Flight out: Icelandair 852, ORD to KEF", "status": "confirmed", "when": "Fri Aug 7, 7:45pm", "ref": "AIR-OBSIDIAN", "place": "ord", "who": "Everyone", "note": "Overnight crossing. Lands in Iceland the next morning." },
     { "title": "Old Town Reykjavik", "status": "confirmed", "when": "Aug 8", "ref": "STAY-OBSIDIAN", "place": "hotel_rvk", "who": "Everyone", "note": "One night before the ship. Walkable to everything downtown." },
     { "title": "Norwegian Star, 7 nights", "status": "confirmed", "when": "Aug 9 to 16", "ref": "NCL-OBSIDIAN", "place": "pier312", "who": "Everyone", "note": "Freestyle cruising. No fixed dining times, no formal nights." },
-    { "title": "Flight home: Icelandair 855, KEF to ORD", "status": "todo", "by": "2026-07-19", "who": "Everyone", "note": "Departure time still unconfirmed. Do not book any transfer until this is pinned down." },
+    { "title": "Flight home: Icelandair 855, KEF to ORD", "status": "confirmed", "when": "Sun Aug 16, 7:45pm Iceland time", "ref": "AIR-OBSIDIAN", "place": "kef", "who": "Everyone", "note": "Lands O'Hare 9:25pm the same evening. Flying west you gain 5 hours back." },
+    { "title": "Blue Lagoon, last day", "status": "todo", "by": "2026-07-20", "place": "blue_lagoon", "who": "Everyone", "url": "https://www.bluelagoon.com", "note": "Book a mid-morning slot. It sells out and there are eleven hours to fill between walking off the ship and the flight." },
+    { "title": "Flybus: cruise terminal to Blue Lagoon to airport", "status": "todo", "by": "2026-07-26", "url": "https://flybus.is", "who": "Everyone", "note": "About $29 to $35 a head instead of the ship's $99.50. Book online." },
     { "title": "Online check-in with Norwegian", "status": "todo", "by": "2026-07-19", "url": "https://www.ncl.com", "who": "Everyone", "note": "Opens Jul 19, 21 days out. Needs passport numbers, an emergency contact who is not sailing, and a card for the onboard account." },
     { "title": "Vigur Island puffin tour", "status": "todo", "by": "2026-07-20", "place": "vigur", "who": "Everyone", "note": "Last window of the season. The birds leave mid-August. Private operators want months of lead time, so this is already tight." },
-    { "title": "Ship-to-airport transfer", "status": "todo", "by": "2026-07-26", "note": "Quoted at $99.50 per person back in February. Nobody has confirmed whether these were purchased." }
+    { "title": "Do NOT buy the ship's airport transfer", "status": "todo", "by": "2026-07-26", "note": "$99.50 a head, and it drops you at Keflavik at 9am for a 7:45pm flight. Wrong plan and four times the price. Flybus via the Blue Lagoon instead." }
   ],
   "lists": [
     {
@@ -77,7 +79,8 @@
   "closingNote": "Salt in the air, obsidian in the backpack, everybody home safe.",
   "places": [
     { "id": "ord", "name": "Chicago O'Hare", "kind": "hub", "icon": "compass", "lat": 41.9786, "lng": -87.9048, "desc": "International departures. Bag drop closes an hour before the flight." },
-    { "id": "kef", "name": "Keflavik Airport", "kind": "hub", "icon": "compass", "lat": 63.985, "lng": -22.6056, "desc": "45 minutes from Reykjavik. The Flybus runs into the city." },
+    { "id": "kef", "name": "Keflavik Airport", "kind": "hub", "icon": "compass", "lat": 63.985, "lng": -22.6056, "desc": "45 minutes from Reykjavik, 20 from the Blue Lagoon. The Flybus runs both legs." },
+    { "id": "blue_lagoon", "name": "Blue Lagoon", "kind": "water", "icon": "water", "lat": 63.8804, "lng": -22.4495, "desc": "Between the city and the airport, and it stores your luggage. The answer to the 11-hour gap on the last day. Book ahead, it sells out." },
     { "id": "hotel_rvk", "name": "Old Town Reykjavik", "kind": "lodging", "icon": "lodging", "lat": 64.1465, "lng": -21.942, "address": "2 Kirkjustraeti, Reykjavik", "desc": "One night before the ship, right on the old town square." },
     { "id": "pier312", "name": "Skarfabakki Pier 312", "kind": "hub", "icon": "compass", "lat": 64.1533, "lng": -21.871, "desc": "The cruise pier. 10 to 12 minutes from downtown by taxi, about 4,000 ISK." },
     { "id": "grundarfjordur", "name": "Grundarfjordur", "kind": "hub", "icon": "beach", "lat": 64.9217, "lng": -23.25, "desc": "Tender port. The village is 500m from the landing." },
@@ -100,12 +103,12 @@
       "date": "2026-08-07",
       "title": "Fly out",
       "timezone": "America/Chicago",
-      "notes": ["Everything about this day is tight. Build in more time than feels necessary."],
+      "notes": ["Kilian skips the last day of camp, so this day has room in it now. Keep the room."],
       "schedule": [
-        { "start": "16:00", "end": "17:45", "title": "Drive to O'Hare", "place": "ord", "who": "Everyone", "note": "Friday evening into Chicago. This is the pinch point of the whole trip." },
-        { "start": "17:45", "end": "18:45", "title": "Park and shuttle to the terminal", "place": "ord", "note": "Off-site lots add 20 to 30 minutes. On-airport costs more and buys time back." },
-        { "start": "18:45", "end": "19:45", "title": "Bag drop, security, gate", "place": "ord", "note": "International bag drop closes 60 minutes out. That is 6:45pm. Hard wall." },
-        { "start": "19:45", "end": "20:45", "title": "Icelandair 852 departs", "place": "ord", "booking": "AIR-OBSIDIAN", "who": "Everyone", "note": "Overnight. Sleep if you can, the first day in Reykjavik is long." }
+        { "start": "13:30", "end": "15:30", "title": "Drive to O'Hare", "place": "ord", "who": "Everyone", "flex": true, "note": "Leaving early is the whole plan. Friday evening into Chicago is the part that used to break." },
+        { "start": "15:30", "end": "16:30", "title": "Park and shuttle to the terminal", "place": "ord", "note": "Off-site lots add 20 to 30 minutes. Terminal 5 for Icelandair." },
+        { "start": "16:30", "end": "18:00", "title": "Bag drop, security, gate", "place": "ord", "note": "International bag drop closes 60 minutes out." },
+        { "start": "19:25", "end": "20:25", "title": "Icelandair 852 departs", "place": "ord", "booking": "AIR-OBSIDIAN", "who": "Everyone", "note": "Published schedule is 7:25pm, but the calendar says 7:45pm. Check the confirmation. Overnight, 6h15, lands 6:40am." }
       ]
     },
     {
@@ -199,13 +202,19 @@
     },
     {
       "date": "2026-08-16",
-      "title": "Disembark and fly home",
+      "title": "Blue Lagoon, then home",
       "closingNote": "Salt in the air, obsidian in the backpack, everybody home safe.",
-      "notes": ["Return flight time is not confirmed yet. Do not lock the transfer until it is."],
+      "notes": [
+        "You walk off at 7am and the plane leaves at 7:45pm. That is eleven hours. Do not spend them in an airport.",
+        "The Blue Lagoon sits between Reykjavik and Keflavik and stores luggage. That is the whole answer to this day."
+      ],
       "schedule": [
-        { "start": "07:00", "end": "09:00", "title": "Dock at Skarfabakki, walk off", "place": "pier312", "who": "Everyone", "note": "Walk-off disembarkation. Carry your own bags and you leave on your own schedule." },
-        { "start": "09:00", "end": "10:00", "title": "Transfer to Keflavik", "place": "kef", "who": "Everyone", "note": "45 minutes from the pier. Confirm whether the $99.50 transfers were ever bought." },
-        { "start": "10:00", "end": "12:00", "title": "Time to fill, if the flight is later", "place": "kef", "who": "Everyone", "flex": true, "note": "The Blue Lagoon sits between the city and the airport and takes luggage. A good use of a long gap." }
+        { "start": "07:00", "end": "08:30", "title": "Dock at Skarfabakki, walk off", "place": "pier312", "who": "Everyone", "note": "Walk-off. Carry your own bags and you leave on your own schedule, not the ship's." },
+        { "start": "09:00", "end": "10:00", "title": "Transfer toward the Blue Lagoon", "place": "blue_lagoon", "who": "Everyone", "note": "Flybus runs the cruise terminal to Blue Lagoon to airport route. Do not buy the ship's transfer for this." },
+        { "start": "10:00", "end": "10:30", "title": "Store the luggage", "place": "blue_lagoon", "who": "Everyone", "note": "Roughly 550 ISK a bag, about $4. Lockers inside for the small stuff." },
+        { "start": "10:30", "end": "15:30", "title": "The Blue Lagoon", "place": "blue_lagoon", "who": "Everyone", "note": "Book ahead. It sells out, and turning up without a slot means you do not get in." },
+        { "start": "16:00", "end": "16:30", "title": "Blue Lagoon to Keflavik", "place": "kef", "who": "Everyone", "note": "About 20 minutes. The Flybus does this leg on a schedule." },
+        { "start": "16:30", "end": "19:45", "title": "Check in, eat, fly", "place": "kef", "who": "Everyone", "note": "Icelandair 855 departs 7:45pm Iceland time and lands O'Hare 9:25pm the SAME evening. You gain 5 hours going west." }
       ]
     }
   ]
