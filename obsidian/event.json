@@ -154,6 +154,14 @@
       "url": "https://flybus.is",
       "who": "Everyone",
       "note": "About $29 to $35 a head instead of the ship's $99.50."
+    },
+    {
+      "title": "ORD parking, Aug 7 to 16",
+      "status": "todo",
+      "by": "2026-08-01",
+      "who": "Everyone",
+      "url": "https://spothero.com",
+      "note": "Ten days. Icelandair is Terminal 5 both ways, which rules out PreFlight - its return shuttle only serves Terminal 2."
     }
   ],
   "lists": [
@@ -897,6 +905,50 @@
           "note": "Icelandair 855 departs 7:45pm Iceland time and lands O'Hare 9:25pm the SAME evening. You gain 5 hours going west."
         }
       ]
+    }
+  ],
+  "prep": [
+    {
+      "title": "Check all three names against the passports",
+      "by": "2026-07-19",
+      "owner": "Michael",
+      "note": "The tickets must match the passport exactly, and they cannot be changed - a mismatch is a new ticket, not a correction. Stacey asked this in February and nobody answered. Five minutes with three passports."
+    },
+    {
+      "title": "Confirm we are actually on the booked excursions",
+      "by": "2026-07-19",
+      "owner": "Michael",
+      "note": "There are two shore excursion booking numbers and no statement of which reservation each covers. Check our three names appear. Same login as check-in."
+    },
+    {
+      "title": "Ask NCL where the Sky Lagoon transfer drops us",
+      "by": "2026-07-24",
+      "owner": "Mom",
+      "note": "Aug 9: hotel checkout is 11:00 and the excursion starts at 11:00, and the front desk shuts at 11:00. Does the transfer go to the ship, and does it take luggage? Mom is already calling - make sure she asks the luggage half."
+    },
+    {
+      "title": "Fix the flight times on the shared calendar",
+      "by": "2026-07-19",
+      "owner": "Michael",
+      "note": "The outbound says 7:45pm and the ticket says 7:25pm. The return is entered as a one-hour block in the wrong timezone with a Reykjavik address - it should read lands O'Hare 9:25pm on the 16th."
+    },
+    {
+      "title": "Download the Kastali app",
+      "by": "2026-08-06",
+      "owner": "Everyone",
+      "note": "The Reykjavik hotel front desk only exists 07:00-11:00. The app is how you get in outside that window, and we land at 06:40."
+    },
+    {
+      "title": "Silence the recurring calendar events for the week",
+      "by": "2026-08-06",
+      "owner": "Michael",
+      "note": "Recovery grounding, Movement, Deep Work, the NA meeting on the 9th, Kilian shower time and Rooster roster all fire while we are in the North Atlantic."
+    },
+    {
+      "title": "Buy the layers we do not own yet",
+      "by": "2026-08-01",
+      "owner": "Everyone",
+      "note": "Waterproof AND windproof shells, wool base layers, and boots broken in before we go. New boots on day four is how a trip gets ruined."
     }
   ]
 }

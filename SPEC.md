@@ -222,6 +222,49 @@ A string shorthand is accepted and treated as a `todo` with just a title:
 `"bookings": ["Book the ferry", "Reserve a campsite"]`. Omit `bookings`
 entirely and the section does not appear.
 
+## `prep` (the Prep tab: what still has to happen before you go)
+
+Optional. The jobs that are not reservations: check the passports, ask the
+operator a question, fix a wrong calendar entry, buy the boots. Renders as a
+**Prep** tab holding a countdown, a month calendar from this month through
+departure, and a checklist. Ticks persist offline under
+`daykit:<event.id>:prep`.
+
+```jsonc
+"prep": [
+  {
+    "title": "Check all three names against the passports",  // required
+    "by": "2026-07-19",     // optional deadline (yyyy-mm-dd). Places the task on
+                            // the calendar and drives the urgency colour: red
+                            // when overdue, amber within 7 days.
+    "owner": "Mom",         // optional free-text chip. Who owns the job, which
+                            // is often not who is going.
+    "who": "Everyone",      // optional; member names render as chips
+    "url": "https://...",   // optional link (Open)
+    "note": "Five minutes with three passports.",  // optional free text
+    "done": false           // optional starting state; a user tick overrides it
+  }
+]
+```
+
+A string shorthand works: `"prep": ["Renew the passports"]`.
+
+**The tab merges two sources.** Every `prep` entry, plus every `bookings` entry
+that is not `confirmed` *and* carries a `by` date — because an unbooked booking
+is a pre-trip job too. A `prep` task whose title matches a booking's wins, so
+listing a thing in both places shows it once. Keep the split clean and you never
+hit that: **`bookings` is what you reserve, `prep` is what you do.**
+
+The tab hides itself when both sources are empty, so trips that don't need it
+never see it.
+
+The calendar runs from the first of the current month through the end of the
+departure month. It marks today, tints every trip day, fills the departure day
+solid, and puts up to three dots on any day with tasks. Tap a day to highlight
+its tasks in the list; tap again or hit the button to clear.
+
+**The countdown** reads from `days[0].date`, so it needs no configuration.
+
 ## Opening hours and time windows
 
 Optional. A stop that is only available certain hours (a tour on the hour, a
